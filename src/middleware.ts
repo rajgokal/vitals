@@ -1,35 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createHmac, timingSafeEqual } from 'crypto';
 
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-me';
 const AGENT_API_KEY = process.env.AGENT_API_KEY || '';
 const COOKIE_NAME = 'vitals_session';
 
-const PUBLIC_PATHS = ['/login', '/api/auth', '/favicon.ico'];
+const PUBLIC_PATHS = ['/login', '/api/auth'];
 
-function verifyToken(token: string): boolean {
+async function hmacSign(payload: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw', enc.encode(SESSION_SECRET), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(payload));
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function verifyToken(token: string): Promise<boolean> {
   const lastDot = token.lastIndexOf('.');
   if (lastDot === -1) return false;
   const payload = token.slice(0, lastDot);
   const sig = token.slice(lastDot + 1);
-  const expected = createHmac('sha256', SESSION_SECRET).update(payload).digest('hex');
-  try {
-    return timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
-  } catch {
-    return false;
-  }
+  const expected = await hmacSign(payload);
+  return sig === expected;
 }
 
 function verifyAgentKey(key: string): boolean {
-  if (!AGENT_API_KEY) return false;
-  try {
-    return timingSafeEqual(Buffer.from(key), Buffer.from(AGENT_API_KEY));
-  } catch {
-    return false;
+  if (!AGENT_API_KEY || key.length !== AGENT_API_KEY.length) return false;
+  // Constant-time comparison
+  let result = 0;
+  for (let i = 0; i < key.length; i++) {
+    result |= key.charCodeAt(i) ^ AGENT_API_KEY.charCodeAt(i);
   }
+  return result === 0;
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public paths
@@ -55,7 +60,7 @@ export function middleware(request: NextRequest) {
 
   // Session cookie
   const session = request.cookies.get(COOKIE_NAME)?.value;
-  if (session && verifyToken(session)) {
+  if (session && await verifyToken(session)) {
     return NextResponse.next();
   }
 

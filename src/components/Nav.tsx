@@ -10,6 +10,7 @@ const links = [
   { href: '/medications', label: 'Meds', icon: '◈' },
   { href: '/genetics', label: 'Genetics', icon: '◇' },
   { href: '/providers', label: 'Team', icon: '◆' },
+  { href: '/wearables', label: 'Wearables', icon: '♥' },
 ];
 
 export default function Nav() {

@@ -279,6 +279,102 @@ All types are defined in `src/lib/types.ts`. Key notes:
 - **Encounters POST**: Appends (does not replace)
 - **All other POST**: Replaces entire dataset
 
+---
+
+## Wearables (v0.3 — Postgres-backed)
+
+All wearable endpoints use Vercel Postgres (Neon). Requires `POSTGRES_URL` env var.
+
+### Migration
+
+**POST /api/wearables/migrate** — Create tables (idempotent, agent key only)
+
+```bash
+curl -X POST https://vitals.rajgokal.com/api/wearables/migrate \
+  -H "Authorization: Bearer $AGENT_API_KEY"
+```
+
+### Sleep
+
+**POST /api/wearables/sleep** — Bulk upsert sleep records (agent key only)
+
+```bash
+curl -X POST https://vitals.rajgokal.com/api/wearables/sleep \
+  -H "Authorization: Bearer $AGENT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"records":[{
+    "source":"oura","date":"2026-02-20","total_sleep_minutes":420,
+    "deep_sleep_minutes":90,"rem_sleep_minutes":110,"light_sleep_minutes":200,
+    "awake_minutes":20,"sleep_score":85,"efficiency":92.5,
+    "hr_lowest":48,"hr_average":55,"hrv_average":45,"breath_average":14.5,
+    "temperature_delta":0.1
+  }]}'
+```
+
+**GET /api/wearables/sleep?from=&to=&limit=&page=** — Paginated sleep data
+
+### Readiness
+
+**POST /api/wearables/readiness** — Bulk upsert readiness records
+
+```bash
+curl -X POST https://vitals.rajgokal.com/api/wearables/readiness \
+  -H "Authorization: Bearer $AGENT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"records":[{
+    "source":"oura","date":"2026-02-20","score":82,
+    "temperature_deviation":0.05,"resting_heart_rate":52,"hrv_balance":45
+  }]}'
+```
+
+**GET /api/wearables/readiness?from=&to=&limit=&page=**
+
+### Activity
+
+**POST /api/wearables/activity** — Bulk upsert activity records
+
+```bash
+curl -X POST https://vitals.rajgokal.com/api/wearables/activity \
+  -H "Authorization: Bearer $AGENT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"records":[{
+    "source":"oura","date":"2026-02-20","score":78,
+    "steps":8500,"active_calories":350,"total_calories":2200,
+    "sedentary_minutes":600,"low_activity_minutes":120,
+    "medium_activity_minutes":45,"high_activity_minutes":30
+  }]}'
+```
+
+**GET /api/wearables/activity?from=&to=&limit=&page=**
+
+### Heart Rate
+
+**POST /api/wearables/heart-rate** — Bulk insert HR records (batches of 500)
+
+```bash
+curl -X POST https://vitals.rajgokal.com/api/wearables/heart-rate \
+  -H "Authorization: Bearer $AGENT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"records":[
+    {"source":"oura","timestamp":"2026-02-20T03:00:00","bpm":52},
+    {"source":"oura","timestamp":"2026-02-20T03:05:00","bpm":54}
+  ]}'
+```
+
+**GET /api/wearables/heart-rate?from=&to=&resolution=daily|hourly|raw&limit=**
+
+### Stress
+
+**POST /api/wearables/stress** — Bulk upsert stress records
+
+**GET /api/wearables/stress?from=&to=&limit=&page=**
+
+### Summary
+
+**GET /api/wearables/summary** — Latest scores + 7d/30d averages (no auth needed beyond session)
+
+---
+
 ## Notes
 
 - All dates should be ISO format: `YYYY-MM-DD`

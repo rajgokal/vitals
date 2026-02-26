@@ -47,12 +47,12 @@ export default function GeneticsPanel({ genetics }: GeneticsPanelProps) {
         </div>
       </DashboardCard>
 
-      {genetics.hlaTypes.length > 0 && (
+      {genetics.hlaTypes?.length > 0 && (
         <DashboardCard title="HLA Types">
           <div className="space-y-0">
-            {genetics.hlaTypes.map(h => (
-              <div key={h.gene} className="flex items-center justify-between py-3 border-b border-border last:border-0">
-                <span className="text-sm font-mono">{h.gene} — {h.variant}</span>
+            {genetics.hlaTypes.map((h, i) => (
+              <div key={h.gene || h.marker || i} className="flex items-center justify-between py-3 border-b border-border last:border-0">
+                <span className="text-sm font-mono">{h.gene || h.marker} — {h.variant || h.result}</span>
                 <span className="text-xs font-medium px-2.5 py-1 rounded-full text-warning bg-warning/10 border border-warning/20">{h.risk}</span>
               </div>
             ))}
@@ -60,10 +60,10 @@ export default function GeneticsPanel({ genetics }: GeneticsPanelProps) {
         </DashboardCard>
       )}
 
-      {genetics.actionableFlags.length > 0 && (
+      {(genetics.actionableFlags || genetics.flags || []).length > 0 && (
         <DashboardCard title="Actionable Flags">
           <div className="flex flex-wrap gap-2">
-            {genetics.actionableFlags.map(f => (
+            {(genetics.actionableFlags || genetics.flags || []).map(f => (
               <span key={f} className="px-3 py-1.5 text-xs rounded-full bg-warning/10 text-warning border border-warning/20 font-medium">
                 {f}
               </span>

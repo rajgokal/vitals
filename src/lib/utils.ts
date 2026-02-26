@@ -13,11 +13,14 @@ export function daysAgo(dateStr: string): number {
   return Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-export function severityColor(severity: 'high' | 'medium' | 'low'): string {
+export function severityColor(severity: string): string {
   switch (severity) {
+    case 'critical': return 'text-critical bg-critical/10 border-critical/20';
     case 'high': return 'text-critical bg-critical/10 border-critical/20';
+    case 'moderate':
     case 'medium': return 'text-warning bg-warning/10 border-warning/20';
     case 'low': return 'text-info bg-info/10 border-info/20';
+    default: return 'text-muted bg-muted/10 border-muted/20';
   }
 }
 

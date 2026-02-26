@@ -45,12 +45,12 @@ export interface GeneticsPanel {
     implications?: string;
     impact?: string;
   }[];
-  hlaTypes: { gene: string; variant: string; risk: string }[];
+  hlaTypes: { gene?: string; marker?: string; variant?: string; result?: string; risk: string }[];
   coagulation?: any;
   flags?: string[];
   sources?: any;
-  actionableFlags: string[];
-  updatedAt: string;
+  actionableFlags?: string[];
+  updatedAt?: string;
 }
 
 export interface Interaction {
@@ -58,7 +58,7 @@ export interface Interaction {
   drug2?: string;
   drugA?: string;
   drugB?: string;
-  severity: 'high' | 'medium' | 'low';
+  severity: 'critical' | 'high' | 'moderate' | 'medium' | 'low';
   description?: string;
   recommendation?: string;
   action?: string;
@@ -99,8 +99,11 @@ export interface Encounter {
 }
 
 export interface Immunization {
-  name: string;
+  name?: string;
+  vaccine?: string;
   date: string;
   provider?: string;
+  location?: string;
   lot?: string;
+  notes?: string;
 }

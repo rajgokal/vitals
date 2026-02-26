@@ -12,9 +12,11 @@ interface MarkerRowProps {
 export default function MarkerRow({ marker }: MarkerRowProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const rangeText = marker.referenceRange.text
-    ?? (marker.referenceRange.low != null && marker.referenceRange.high != null
-      ? `${marker.referenceRange.low}–${marker.referenceRange.high}`
+  const ref = marker.referenceRange;
+  const rangeText = marker.range
+    ?? ref?.text
+    ?? (ref?.low != null && ref?.high != null
+      ? `${ref.low}–${ref.high}`
       : '');
 
   return (
@@ -54,8 +56,8 @@ export default function MarkerRow({ marker }: MarkerRowProps) {
             <MarkerTrend
               markerName={marker.name}
               unit={marker.unit}
-              refLow={marker.referenceRange.low}
-              refHigh={marker.referenceRange.high}
+              refLow={ref?.low}
+              refHigh={ref?.high}
             />
           </div>
         )}

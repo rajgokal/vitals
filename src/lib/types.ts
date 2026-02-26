@@ -74,7 +74,8 @@ export interface LabMarker {
   name: string;
   value: number | string;
   unit: string;
-  referenceRange: { low?: number; high?: number; text?: string };
+  referenceRange?: { low?: number; high?: number; text?: string } | null;
+  range?: string;
   flag?: 'high' | 'low' | 'critical';
   category?: string;
 }

@@ -7,8 +7,9 @@ import RecordsClient from './RecordsClient';
 export const dynamic = 'force-dynamic';
 
 export default async function RecordsPage() {
-  const records = await kvGet<MedicalRecord[]>('vitals:records') ?? [];
-  records.sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt));
+  const raw = await kvGet<MedicalRecord[]>('vitals:records') ?? [];
+  const records = Array.isArray(raw) ? raw : [];
+  records.sort((a, b) => (b.uploadedAt ?? '').localeCompare(a.uploadedAt ?? ''));
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen">

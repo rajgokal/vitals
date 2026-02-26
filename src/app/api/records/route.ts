@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { kvGet, kvSet } from '@/lib/kv';
+import { kvGet, kvSet, kvDel } from '@/lib/kv';
 import { isAgentRequest } from '@/lib/api-helpers';
 import type { MedicalRecord } from '@/lib/types';
 
@@ -14,6 +14,14 @@ export async function GET(request: NextRequest) {
   } catch {
     return NextResponse.json([], { status: 200 });
   }
+}
+
+export async function DELETE(request: NextRequest) {
+  if (!isAgentRequest(request)) {
+    return NextResponse.json({ error: 'Agent key required' }, { status: 403 });
+  }
+  await kvSet(KV_KEY, []);
+  return NextResponse.json({ ok: true, cleared: true });
 }
 
 export async function POST(request: NextRequest) {

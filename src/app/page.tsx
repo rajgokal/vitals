@@ -17,7 +17,7 @@ export default async function Dashboard() {
   ]);
 
   const sortedLabs = labs?.sort((a, b) => b.date.localeCompare(a.date)) ?? null;
-  const activeMeds = medications?.filter(m => m.active).length ?? 0;
+  const activeMeds = medications?.filter(m => m.status === 'current' || m.active).length ?? 0;
   const labCount = labs?.length ?? 0;
   const lastDraw = sortedLabs?.[0];
 

@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export default async function MedicationsPage() {
   const medications = await kvGet<Medication[]>('vitals:medications') ?? [];
   const active = medications.filter(m => m.status === 'current' || m.active);
-  const historical = medications.filter(m => m.status === 'stopped' || (m.active === false));
+  const historical = medications.filter(m => m.status === 'stopped' || (m.active === false && m.status !== 'current'));
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen">

@@ -7,9 +7,19 @@ import RecordsClient from './RecordsClient';
 export const dynamic = 'force-dynamic';
 
 export default async function RecordsPage() {
-  const raw = await kvGet<MedicalRecord[]>('vitals:records') ?? [];
-  const records = Array.isArray(raw) ? raw : [];
-  records.sort((a, b) => (b.uploadedAt ?? '').localeCompare(a.uploadedAt ?? ''));
+  let records: MedicalRecord[] = [];
+  try {
+    const raw = await kvGet<unknown>('vitals:records') ?? [];
+    const arr = Array.isArray(raw) ? raw : [];
+    // Filter to only valid record objects (skip corrupted/nested entries)
+    records = arr.filter(
+      (r): r is MedicalRecord =>
+        r != null && typeof r === 'object' && !Array.isArray(r) && typeof (r as Record<string, unknown>).filename === 'string'
+    );
+    records.sort((a, b) => (b.uploadedAt ?? '').localeCompare(a.uploadedAt ?? ''));
+  } catch {
+    records = [];
+  }
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen">

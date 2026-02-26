@@ -14,7 +14,7 @@ export default async function RecordsPage() {
     // Filter to only valid record objects (skip corrupted/nested entries)
     records = arr.filter(
       (r): r is MedicalRecord =>
-        r != null && typeof r === 'object' && !Array.isArray(r) && typeof (r as Record<string, unknown>).filename === 'string'
+        r != null && typeof r === 'object' && !Array.isArray(r) && typeof (r as Record<string, unknown>).id === 'string'
     );
     records.sort((a, b) => (b.uploadedAt ?? '').localeCompare(a.uploadedAt ?? ''));
   } catch {

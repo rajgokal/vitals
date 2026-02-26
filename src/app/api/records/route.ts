@@ -34,9 +34,9 @@ export async function POST(request: NextRequest) {
     const unwrapped = !Array.isArray(body) && body?.records && Array.isArray(body.records) ? body.records : body;
     const incoming: MedicalRecord[] = Array.isArray(unwrapped) ? unwrapped : [unwrapped];
     const raw = await kvGet<unknown[]>(KV_KEY) ?? [];
-    // Filter existing to only valid records
+    // Filter existing to only valid record objects (must have id)
     const existing = (Array.isArray(raw) ? raw : []).filter(
-      (r): r is MedicalRecord => r != null && typeof r === 'object' && !Array.isArray(r) && typeof (r as Record<string, unknown>).filename === 'string'
+      (r): r is MedicalRecord => r != null && typeof r === 'object' && !Array.isArray(r) && typeof (r as Record<string, unknown>).id === 'string'
     );
 
     for (const record of incoming) {

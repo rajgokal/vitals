@@ -49,14 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     await kvSet(KV_KEY, existing);
-    const uniqueIds = new Set(incoming.map(r => r.id));
-    return NextResponse.json({
-      ok: true,
-      count: incoming.length,
-      uniqueIds: uniqueIds.size,
-      stored: existing.length,
-      sampleIds: incoming.slice(0, 3).map(r => r.id),
-    });
+    return NextResponse.json({ ok: true, count: incoming.length, stored: existing.length });
   } catch {
     return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   }

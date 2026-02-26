@@ -34,13 +34,13 @@ export default function GeneticsPanel({ genetics }: GeneticsPanelProps) {
             <div key={e.gene} className="flex flex-col sm:flex-row sm:items-center justify-between py-3 border-b border-border last:border-0 gap-2">
               <div className="flex items-center gap-3">
                 <p className="text-sm font-mono font-medium w-24 shrink-0">{e.gene}</p>
-                <p className="text-xs text-muted">{e.variant}</p>
+                <p className="text-xs text-muted">{e.genotype || e.variant}</p>
               </div>
               <div className="flex items-center gap-2 sm:text-right">
-                <span className={cn('text-xs font-medium px-2.5 py-1 rounded-full', metabolizerBadge(e.metabolizerStatus))}>
-                  {e.metabolizerStatus}
+                <span className={cn('text-xs font-medium px-2.5 py-1 rounded-full', metabolizerBadge(e.phenotype || e.metabolizerStatus || ''))}>
+                  {e.phenotype || e.metabolizerStatus}
                 </span>
-                <p className="text-xs text-muted max-w-48 hidden md:block">{e.implications}</p>
+                <p className="text-xs text-muted max-w-48 hidden md:block">{e.impact || e.implications}</p>
               </div>
             </div>
           ))}

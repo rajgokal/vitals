@@ -12,37 +12,56 @@ export interface Profile {
 
 export interface Medication {
   name: string;
-  dosage: string;
+  dosage?: string;
+  dose?: string;
   frequency: string;
   prescriber?: string;
-  startDate: string;
+  startDate?: string;
   endDate?: string;
-  active: boolean;
+  active?: boolean;
+  status?: "current" | "stopped";
   notes?: string;
 }
 
 export interface Supplement {
   name: string;
-  dosage: string;
-  frequency: string;
+  dosage?: string;
+  dose?: string;
+  frequency?: string;
+  timing?: string;
   reason?: string;
-  active: boolean;
+  active?: boolean;
+  status?: "current" | "stopped";
   stoppedReason?: string;
 }
 
 export interface GeneticsPanel {
-  enzymes: { gene: string; variant: string; metabolizerStatus: string; implications: string }[];
+  enzymes: { 
+    gene: string; 
+    variant?: string;
+    genotype?: string;
+    metabolizerStatus?: string;
+    phenotype?: string;
+    implications?: string;
+    impact?: string;
+  }[];
   hlaTypes: { gene: string; variant: string; risk: string }[];
+  coagulation?: any;
+  flags?: string[];
+  sources?: any;
   actionableFlags: string[];
   updatedAt: string;
 }
 
 export interface Interaction {
-  drug1: string;
-  drug2: string;
+  drug1?: string;
+  drug2?: string;
+  drugA?: string;
+  drugB?: string;
   severity: 'high' | 'medium' | 'low';
-  description: string;
-  recommendation: string;
+  description?: string;
+  recommendation?: string;
+  action?: string;
 }
 
 export interface LabDraw {
@@ -62,8 +81,11 @@ export interface LabMarker {
 
 export interface Provider {
   name: string;
-  specialty: string;
+  specialty?: string;
+  role?: string;
   facility?: string;
+  practice?: string;
+  address?: string;
   phone?: string;
   email?: string;
   lastVisit?: string;

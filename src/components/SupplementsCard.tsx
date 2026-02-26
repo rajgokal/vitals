@@ -6,7 +6,7 @@ interface SupplementsCardProps {
 }
 
 export default function SupplementsCard({ supplements }: SupplementsCardProps) {
-  const active = supplements?.filter(s => s.active) ?? [];
+  const active = supplements?.filter(s => s.status === 'current' || s.active) ?? [];
 
   return (
     <DashboardCard title="Supplements">
@@ -18,7 +18,7 @@ export default function SupplementsCard({ supplements }: SupplementsCardProps) {
             <li key={s.name} className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">{s.name}</p>
-                <p className="text-xs text-muted">{s.dosage} · {s.frequency}</p>
+                <p className="text-xs text-muted">{s.dose || s.dosage} · {s.timing || s.frequency}</p>
               </div>
               {s.reason && <span className="text-xs text-muted">{s.reason}</span>}
             </li>

@@ -7,8 +7,8 @@ export const dynamic = 'force-dynamic';
 
 export default async function MedicationsPage() {
   const medications = await kvGet<Medication[]>('vitals:medications') ?? [];
-  const active = medications.filter(m => m.active);
-  const historical = medications.filter(m => !m.active);
+  const active = medications.filter(m => m.status === 'current' || m.active);
+  const historical = medications.filter(m => m.status === 'stopped' || (m.active === false));
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
@@ -37,11 +37,11 @@ export default async function MedicationsPage() {
                     <div className="flex items-start justify-between">
                       <div>
                         <p className="text-sm font-semibold">{m.name}</p>
-                        <p className="text-xs text-muted mt-0.5">{m.dosage} · {m.frequency}</p>
+                        <p className="text-xs text-muted mt-0.5">{m.dose || m.dosage} · {m.frequency}</p>
                         {m.prescriber && <p className="text-xs text-muted">Rx: {m.prescriber}</p>}
                         {m.notes && <p className="text-xs text-muted mt-1 italic">{m.notes}</p>}
                       </div>
-                      <span className="text-xs text-muted whitespace-nowrap ml-4">Since {formatDate(m.startDate)}</span>
+                      <span className="text-xs text-muted whitespace-nowrap ml-4">{m.startDate ? `Since ${formatDate(m.startDate)}` : ''}</span>
                     </div>
                   </div>
                 ))}
@@ -61,11 +61,11 @@ export default async function MedicationsPage() {
                   <div key={m.name + m.startDate} className="rounded-xl border border-border/60 bg-card/50 p-3.5 opacity-70 hover:opacity-90 transition-opacity duration-150">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm">{m.name} — {m.dosage}</p>
+                        <p className="text-sm">{m.name} — {m.dose || m.dosage}</p>
                         {m.notes && <p className="text-xs text-muted mt-0.5 italic">{m.notes}</p>}
                       </div>
                       <span className="text-xs text-muted whitespace-nowrap ml-4">
-                        {formatDate(m.startDate)} – {m.endDate ? formatDate(m.endDate) : '?'}
+                        {m.startDate ? formatDate(m.startDate) : '?'} – {m.endDate ? formatDate(m.endDate) : '?'}
                       </span>
                     </div>
                   </div>

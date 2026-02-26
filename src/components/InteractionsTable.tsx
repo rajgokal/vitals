@@ -21,13 +21,17 @@ export default function InteractionsTable({ interactions }: InteractionsTablePro
         {interactions.map((ix, i) => (
           <div key={i} className="p-3 rounded-lg border border-border hover:bg-card-hover">
             <div className="flex items-center justify-between mb-1.5">
-              <p className="text-sm font-medium">{ix.drug1} ↔ {ix.drug2}</p>
+              <p className="text-sm font-medium">{ix.drugA || ix.drug1} ↔ {ix.drugB || ix.drug2}</p>
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${severityColor(ix.severity)}`}>
                 {ix.severity}
               </span>
             </div>
-            <p className="text-xs text-muted">{ix.description}</p>
-            <p className="text-xs text-accent mt-1">{ix.recommendation}</p>
+            {(ix.description || ix.action) && (
+              <p className="text-xs text-muted">{ix.action || ix.description}</p>
+            )}
+            {ix.recommendation && (
+              <p className="text-xs text-accent mt-1">{ix.recommendation}</p>
+            )}
           </div>
         ))}
       </div>

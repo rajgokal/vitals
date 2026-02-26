@@ -7,7 +7,7 @@ interface MedsCardProps {
 }
 
 export default function MedsCard({ medications }: MedsCardProps) {
-  const active = medications?.filter(m => m.active) ?? [];
+  const active = medications?.filter(m => m.status === 'current' || m.active) ?? [];
 
   return (
     <DashboardCard
@@ -22,7 +22,7 @@ export default function MedsCard({ medications }: MedsCardProps) {
             <li key={m.name} className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">{m.name}</p>
-                <p className="text-xs text-muted">{m.dosage} · {m.frequency}</p>
+                <p className="text-xs text-muted">{m.dose || m.dosage} · {m.frequency}</p>
               </div>
             </li>
           ))}

@@ -103,6 +103,7 @@ export interface MedicalRecord {
   id: string;
   filename: string;
   documentType: string;
+  source?: string;
   dateRange?: { start: string; end: string };
   uploadedAt: string;
   status: 'complete' | 'partial' | 'error';

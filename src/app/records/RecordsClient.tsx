@@ -88,6 +88,11 @@ export default function RecordsClient({ records }: { records: MedicalRecord[] })
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${STATUS_STYLES[record.status] ?? STATUS_STYLES.error}`}>
                     {record.status}
                   </span>
+                  {record.source && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-slate-700 text-slate-200">
+                      {record.source}
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs text-muted mt-1">{record.description}</p>
                 <div className="flex flex-wrap gap-3 mt-2 text-xs text-muted">

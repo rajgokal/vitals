@@ -40,3 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env*.local
+
+# Playwright outputs
+playwright-report/
+blob-report/
+/test-results/
+
+# Do not commit auth state
+/e2e/.auth/

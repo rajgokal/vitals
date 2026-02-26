@@ -5,10 +5,15 @@ import type { MedicalRecord } from '@/lib/types';
 
 const KV_KEY = 'vitals:records';
 
-export async function GET() {
-  const records = await kvGet<MedicalRecord[]>(KV_KEY) ?? [];
-  records.sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt));
-  return NextResponse.json(records);
+export async function GET(request: NextRequest) {
+  try {
+    const records = await kvGet<MedicalRecord[]>(KV_KEY) ?? [];
+    if (!Array.isArray(records)) return NextResponse.json([]);
+    records.sort((a, b) => (b.uploadedAt ?? '').localeCompare(a.uploadedAt ?? ''));
+    return NextResponse.json(records);
+  } catch {
+    return NextResponse.json([], { status: 200 });
+  }
 }
 
 export async function POST(request: NextRequest) {

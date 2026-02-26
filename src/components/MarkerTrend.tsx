@@ -23,9 +23,10 @@ interface MarkerTrendProps {
   unit: string;
   refLow?: number;
   refHigh?: number;
+  historyCount?: number;
 }
 
-export default function MarkerTrend({ markerName, unit, refLow, refHigh }: MarkerTrendProps) {
+export default function MarkerTrend({ markerName, unit, refLow, refHigh, historyCount }: MarkerTrendProps) {
   const [data, setData] = useState<DataPoint[] | null>(null);
   const [error, setError] = useState(false);
 
@@ -62,6 +63,16 @@ export default function MarkerTrend({ markerName, unit, refLow, refHigh }: Marke
     );
   }
   if (data.length < 2) {
+    if (data.length === 1) {
+      return (
+        <div className="flex items-center gap-2 py-2">
+          <span className="inline-block w-2.5 h-2.5 rounded-full bg-accent" />
+          <span className="text-xs text-muted">
+            {data[0].value} {unit} — {new Date(data[0].date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', year: '2-digit' })}
+          </span>
+        </div>
+      );
+    }
     return <p className="text-xs text-muted py-2">Not enough data for trend</p>;
   }
 

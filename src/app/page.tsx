@@ -38,7 +38,7 @@ export default async function Dashboard() {
             <ProfileCard profile={profile} />
             <MedsCard medications={medications} />
             <SupplementsCard supplements={supplements} />
-            <LabsCard labs={sortedLabs} />
+            <LabsCard />
           </div>
         </div>
       </main>

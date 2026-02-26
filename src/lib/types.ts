@@ -99,6 +99,18 @@ export interface Encounter {
   summary: string;
 }
 
+export interface MedicalRecord {
+  id: string;
+  filename: string;
+  documentType: string;
+  dateRange?: { start: string; end: string };
+  uploadedAt: string;
+  status: 'complete' | 'partial' | 'error';
+  description: string;
+  recordCount?: number;
+  errors?: string[];
+}
+
 export interface Immunization {
   name?: string;
   vaccine?: string;

@@ -11,6 +11,7 @@ const links = [
   { href: '/genetics', label: 'Genetics', icon: '◇' },
   { href: '/providers', label: 'Team', icon: '◆' },
   { href: '/wearables', label: 'Wearables', icon: '♥' },
+  { href: '/records', label: 'Records', icon: '▣' },
 ];
 
 export default function Nav() {

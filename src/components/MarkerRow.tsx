@@ -7,9 +7,16 @@ import MarkerTrend from './MarkerTrend';
 
 interface MarkerRowProps {
   marker: LabMarker;
+  date?: string;
+  historyCount?: number;
 }
 
-export default function MarkerRow({ marker }: MarkerRowProps) {
+function formatShortDate(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+export default function MarkerRow({ marker, date, historyCount }: MarkerRowProps) {
   const [expanded, setExpanded] = useState(false);
 
   const ref = marker.referenceRange;
@@ -29,13 +36,16 @@ export default function MarkerRow({ marker }: MarkerRowProps) {
         <div className="flex-1 min-w-0">
           <span className="text-sm">{marker.name}</span>
           {marker.category && (
-            <span className="text-xs text-muted ml-2">{marker.category}</span>
+            <span className="text-xs text-muted ml-2 hidden sm:inline">{marker.category}</span>
           )}
         </div>
-        <div className="flex items-center gap-3 text-right">
+        <div className="flex items-center gap-2 sm:gap-3 text-right">
           <span className={`text-sm font-mono font-medium ${flagColor(marker.flag)}`}>
             {marker.value} <span className="text-xs text-muted">{marker.unit}</span>
           </span>
+          {date && (
+            <span className="text-[10px] text-muted">{formatShortDate(date)}</span>
+          )}
           {rangeText && (
             <span className="text-xs text-muted w-24 text-right hidden sm:block">{rangeText}</span>
           )}
@@ -58,6 +68,7 @@ export default function MarkerRow({ marker }: MarkerRowProps) {
               unit={marker.unit}
               refLow={ref?.low}
               refHigh={ref?.high}
+              historyCount={historyCount}
             />
           </div>
         )}

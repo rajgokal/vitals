@@ -78,12 +78,26 @@ export default function MarkerTrend({ markerName, unit, refLow, refHigh, history
 
   const values = data.map(d => d.value);
   const allVals = [...values];
-  if (refLow != null) allVals.push(refLow);
-  if (refHigh != null) allVals.push(refHigh);
+  // Always show at least the top half of the reference range so the ideal zone is visible
+  if (refLow != null && refHigh != null) {
+    const refMid = (refLow + refHigh) / 2;
+    allVals.push(refMid, refHigh);
+  } else {
+    if (refLow != null) allVals.push(refLow);
+    if (refHigh != null) allVals.push(refHigh);
+  }
   const yMin = Math.min(...allVals) * 0.92;
   const yMax = Math.max(...allVals) * 1.08;
 
   const flaggedPoints = data.filter(d => d.flag);
+
+  const idealLabel = refLow != null && refHigh != null
+    ? `Ideal: ${refLow}–${refHigh} ${unit}`
+    : refHigh != null
+      ? `Ideal: <${refHigh} ${unit}`
+      : refLow != null
+        ? `Ideal: >${refLow} ${unit}`
+        : null;
 
   const formatLabel = (d: string) => {
     const dt = new Date(d);
@@ -91,7 +105,12 @@ export default function MarkerTrend({ markerName, unit, refLow, refHigh, history
   };
 
   return (
-    <div className="h-32 w-full mt-2 mb-1">
+    <div className="h-32 w-full mt-2 mb-1 relative">
+      {idealLabel && (
+        <div className="absolute top-0 right-2 z-10 text-[10px] text-accent/70 font-medium">
+          {idealLabel}
+        </div>
+      )}
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 8, right: 12, bottom: 4, left: 4 }}>
           {refLow != null && refHigh != null && (

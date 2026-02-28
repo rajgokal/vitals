@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import type { LabMarker } from '@/lib/types';
 import { flagColor } from '@/lib/utils';
+import { getMarkerExplanation } from '@/lib/marker-explanations';
+import { resolveRange } from '@/lib/marker-ranges';
 import MarkerTrend from './MarkerTrend';
 
 interface CompactMarkerRowProps {
@@ -19,7 +21,8 @@ function formatShortDate(dateStr: string): string {
 export default function CompactMarkerRow({ marker, date, historyCount }: CompactMarkerRowProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const ref = marker.referenceRange;
+  const resolved = resolveRange(marker.name, marker.referenceRange, marker.range);
+  const explanation = getMarkerExplanation(marker.name);
 
   return (
     <div>
@@ -32,7 +35,12 @@ export default function CompactMarkerRow({ marker, date, historyCount }: Compact
           {historyCount != null && historyCount > 1 && (
             <span className="text-[10px] text-muted font-mono shrink-0">×{historyCount}</span>
           )}
-          <span className="text-xs truncate">{marker.name}</span>
+          <span className="text-xs shrink-0">{marker.name}</span>
+          {explanation && (
+            <span className="text-[10px] text-muted/60 truncate leading-none">
+              — {explanation}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <span className={`text-xs font-mono font-medium ${flagColor(marker.flag)}`}>
@@ -51,15 +59,15 @@ export default function CompactMarkerRow({ marker, date, historyCount }: Compact
       </button>
       <div
         className="overflow-hidden transition-all duration-200 ease-out"
-        style={{ maxHeight: expanded ? '200px' : '0px', opacity: expanded ? 1 : 0 }}
+        style={{ maxHeight: expanded ? '280px' : '0px', opacity: expanded ? 1 : 0 }}
       >
         {expanded && (
-          <div className="px-2 pb-1">
+          <div className="px-2 pb-2 space-y-2">
             <MarkerTrend
               markerName={marker.name}
               unit={marker.unit}
-              refLow={ref?.low}
-              refHigh={ref?.high}
+              refLow={resolved?.low}
+              refHigh={resolved?.high}
               historyCount={historyCount}
             />
           </div>

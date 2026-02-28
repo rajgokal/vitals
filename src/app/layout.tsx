@@ -17,12 +17,21 @@ import type { Viewport } from 'next';
 export const metadata: Metadata = {
   title: 'Vitals',
   description: 'Personal health dashboard',
+  manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/vitals-icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  themeColor: '#09090b',
 };
 
 export default function RootLayout({

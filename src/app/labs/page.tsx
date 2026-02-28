@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Nav from '@/components/Nav';
 import CompactMarkerRow from '@/components/CompactMarkerRow';
+import LabsSort from '@/components/LabsSort';
+import type { SortMode, FilterMode } from '@/components/LabsSort';
 import type { LatestMarker } from '@/app/api/labs/latest-all/route';
 import type { LabDraw } from '@/lib/types';
 import { formatDate } from '@/lib/utils';
@@ -17,6 +19,8 @@ export default function LabsPage() {
   const [markerData, setMarkerData] = useState<LatestAllResponse | null>(null);
   const [draws, setDraws] = useState<LabDraw[] | null>(null);
   const [error, setError] = useState(false);
+  const [sort, setSort] = useState<SortMode>('frequency');
+  const [filter, setFilter] = useState<FilterMode>('all');
 
   useEffect(() => {
     fetch('/api/labs/latest-all')
@@ -33,20 +37,39 @@ export default function LabsPage() {
   const drawCount = markerData?.drawCount ?? 0;
   const sortedDraws = draws ?? [];
 
+  const processed = useMemo(() => {
+    let filtered = [...markers];
+    if (filter === 'flagged') filtered = filtered.filter(m => m.flag);
+    if (filter === 'normal') filtered = filtered.filter(m => !m.flag);
+
+    filtered.sort((a, b) => {
+      switch (sort) {
+        case 'date': return b.date.localeCompare(a.date);
+        case 'name': return a.name.localeCompare(b.name);
+        case 'flagged': {
+          const w = (f?: string) => f === 'critical' ? 3 : f === 'high' ? 2 : f === 'low' ? 1 : 0;
+          return w(b.flag) - w(a.flag) || b.historyCount - a.historyCount;
+        }
+        default: return b.historyCount !== a.historyCount
+          ? b.historyCount - a.historyCount
+          : a.name.localeCompare(b.name);
+      }
+    });
+    return filtered;
+  }, [markers, sort, filter]);
+
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
       <Nav />
       <main className="flex-1 pb-20 md:pb-0">
         <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-6">
-          {/* Header */}
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-semibold tracking-tight">Labs</h1>
             {markers.length > 0 && (
-              <span className="text-xs text-muted">{markers.length} markers</span>
+              <span className="text-xs text-muted">{processed.length} markers</span>
             )}
           </div>
 
-          {/* All Markers */}
           {error ? (
             <p className="text-muted text-sm">Failed to load markers</p>
           ) : !markerData ? (
@@ -61,24 +84,26 @@ export default function LabsPage() {
               <p className="text-xs text-muted mt-1">Lab draws will appear here once uploaded</p>
             </div>
           ) : (
-            <div className="rounded-xl border border-border bg-card p-3">
-              <p className="text-xs text-muted mb-2 px-2">
-                {markers.length} markers across {drawCount} draw{drawCount !== 1 ? 's' : ''} · sorted by frequency
-              </p>
-              <div className="space-y-px">
-                {markers.map(m => (
-                  <CompactMarkerRow
-                    key={m.name}
-                    marker={m}
-                    date={m.date}
-                    historyCount={m.historyCount}
-                  />
-                ))}
+            <>
+              <LabsSort sort={sort} filter={filter} onSortChange={setSort} onFilterChange={setFilter} />
+              <div className="rounded-xl border border-border bg-card p-3">
+                <p className="text-xs text-muted mb-2 px-2">
+                  {processed.length} markers across {drawCount} draw{drawCount !== 1 ? 's' : ''}
+                </p>
+                <div className="space-y-px">
+                  {processed.map(m => (
+                    <CompactMarkerRow
+                      key={m.name}
+                      marker={m}
+                      date={m.date}
+                      historyCount={m.historyCount}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+            </>
           )}
 
-          {/* Lab Draws */}
           {sortedDraws.length > 0 && (
             <>
               <div className="border-t border-border pt-4">

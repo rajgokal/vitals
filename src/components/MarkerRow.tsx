@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { LabMarker } from '@/lib/types';
 import { flagColor } from '@/lib/utils';
+import { resolveRange } from '@/lib/marker-ranges';
 import MarkerTrend from './MarkerTrend';
 
 interface MarkerRowProps {
@@ -20,11 +21,16 @@ export default function MarkerRow({ marker, date, historyCount }: MarkerRowProps
   const [expanded, setExpanded] = useState(false);
 
   const ref = marker.referenceRange;
+  const resolved = resolveRange(marker.name, ref, marker.range);
   const rangeText = marker.range
     ?? ref?.text
-    ?? (ref?.low != null && ref?.high != null
-      ? `${ref.low}–${ref.high}`
-      : '');
+    ?? (resolved?.low != null && resolved?.high != null
+      ? `${resolved.low}–${resolved.high}`
+      : resolved?.high != null
+        ? `<${resolved.high}`
+        : resolved?.low != null
+          ? `>${resolved.low}`
+          : '');
 
   return (
     <div>
@@ -66,8 +72,8 @@ export default function MarkerRow({ marker, date, historyCount }: MarkerRowProps
             <MarkerTrend
               markerName={marker.name}
               unit={marker.unit}
-              refLow={ref?.low}
-              refHigh={ref?.high}
+              refLow={resolved?.low}
+              refHigh={resolved?.high}
               historyCount={historyCount}
             />
           </div>

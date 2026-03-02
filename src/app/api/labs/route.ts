@@ -17,10 +17,17 @@ function resolveOrderingProvider(
 }
 
 export async function GET(request: NextRequest) {
-  const [draws, providers] = await Promise.all([
-    kvGet<LabDraw[]>('vitals:labs').then(d => d ?? []),
+  const [rawDraws, providers] = await Promise.all([
+    kvGet<unknown[]>('vitals:labs').then(d => d ?? []),
     kvGet<Provider[]>('vitals:providers').then(p => p ?? []),
   ]);
+  // Filter out corrupted entries (must have string date + markers array)
+  const draws = rawDraws.filter(
+    (d): d is LabDraw =>
+      d != null && typeof d === 'object' && !Array.isArray(d) &&
+      typeof (d as Record<string, unknown>).date === 'string' &&
+      Array.isArray((d as Record<string, unknown>).markers)
+  );
   const { searchParams } = request.nextUrl;
   const from = searchParams.get('from');
   const to = searchParams.get('to');
@@ -57,6 +64,9 @@ export async function POST(request: NextRequest) {
   }
   try {
     const draw: LabDraw = await request.json();
+    if (!draw.date || !draw.markers) {
+      return NextResponse.json({ error: 'date and markers required' }, { status: 400 });
+    }
     const existing = await kvGet<LabDraw[]>('vitals:labs') ?? [];
     // Replace if same date exists, otherwise add
     const idx = existing.findIndex(d => d.date === draw.date);
@@ -67,6 +77,49 @@ export async function POST(request: NextRequest) {
     }
     await kvSet('vitals:labs', existing);
     return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json({ error: 'Bad request' }, { status: 400 });
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  if (!isAgentRequest(request)) {
+    return NextResponse.json({ error: 'Agent key required' }, { status: 403 });
+  }
+  try {
+    const { date, updates } = await request.json() as { date: string; updates: Partial<LabDraw> };
+    if (!date) {
+      return NextResponse.json({ error: 'date required' }, { status: 400 });
+    }
+    const existing = await kvGet<LabDraw[]>('vitals:labs') ?? [];
+    const idx = existing.findIndex(d => d.date === date);
+    if (idx < 0) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+    existing[idx] = { ...existing[idx], ...updates, date };
+    await kvSet('vitals:labs', existing);
+    return NextResponse.json({ ok: true, draw: existing[idx] });
+  } catch {
+    return NextResponse.json({ error: 'Bad request' }, { status: 400 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  if (!isAgentRequest(request)) {
+    return NextResponse.json({ error: 'Agent key required' }, { status: 403 });
+  }
+  try {
+    const { date } = await request.json() as { date: string };
+    if (!date) {
+      return NextResponse.json({ error: 'date required' }, { status: 400 });
+    }
+    const existing = await kvGet<LabDraw[]>('vitals:labs') ?? [];
+    const filtered = existing.filter(d => d.date !== date);
+    if (filtered.length === existing.length) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+    await kvSet('vitals:labs', filtered);
+    return NextResponse.json({ ok: true, removed: existing.length - filtered.length });
   } catch {
     return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   }

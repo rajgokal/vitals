@@ -16,7 +16,11 @@ export default async function RecordsPage() {
       (r): r is MedicalRecord =>
         r != null && typeof r === 'object' && !Array.isArray(r) && typeof (r as Record<string, unknown>).id === 'string'
     );
-    records.sort((a, b) => (b.uploadedAt ?? '').localeCompare(a.uploadedAt ?? ''));
+    records.sort((a, b) => {
+      const dateA = a.dateRange?.end ?? a.dateRange?.start ?? a.uploadedAt ?? '';
+      const dateB = b.dateRange?.end ?? b.dateRange?.start ?? b.uploadedAt ?? '';
+      return dateB.localeCompare(dateA);
+    });
   } catch {
     records = [];
   }

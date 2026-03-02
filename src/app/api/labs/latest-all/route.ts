@@ -16,7 +16,14 @@ export interface LatestMarker {
 }
 
 export async function GET() {
-  const draws = await kvGet<LabDraw[]>('vitals:labs') ?? [];
+  const raw = await kvGet<unknown[]>('vitals:labs') ?? [];
+  // Filter corrupted entries
+  const draws = raw.filter(
+    (d): d is LabDraw =>
+      d != null && typeof d === 'object' && !Array.isArray(d) &&
+      typeof (d as Record<string, unknown>).date === 'string' &&
+      Array.isArray((d as Record<string, unknown>).markers)
+  );
   if (!draws.length) return NextResponse.json({ markers: [], drawCount: 0 });
 
   // Sort draws by date descending

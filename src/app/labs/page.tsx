@@ -123,7 +123,8 @@ export default function LabsPage() {
                         <div>
                           <p className="text-sm font-medium">{formatDate(draw.date)}</p>
                           <p className="text-xs text-muted mt-0.5">
-                            {draw.orderedBy ? `${draw.orderedBy} · ` : ''}{draw.source} · {draw.markers.length} markers
+                            {draw.orderedBy && !draw.source.toLowerCase().includes(draw.orderedBy.toLowerCase())
+                              ? `${draw.orderedBy} · ` : ''}{draw.source} · {draw.markers.length} markers
                           </p>
                         </div>
                         <div className="flex items-center gap-3">

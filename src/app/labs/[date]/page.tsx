@@ -38,7 +38,8 @@ export default async function LabDrawPage({ params }: Props) {
           <div>
             <h1 className="text-xl font-semibold tracking-tight">{formatDate(draw.date)}</h1>
             <p className="text-sm text-muted">
-              {draw.orderedBy ? `${draw.orderedBy} · ` : ''}{draw.source} · {draw.markers.length} markers
+              {draw.orderedBy && !draw.source.toLowerCase().includes(draw.orderedBy.toLowerCase())
+                ? `${draw.orderedBy} · ` : ''}{draw.source} · {draw.markers.length} markers
             </p>
           </div>
           {Array.from(categories.entries()).map(([cat, markers]) => (

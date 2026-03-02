@@ -1,10 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { kvGet, kvSet } from '@/lib/kv';
 import { isAgentRequest } from '@/lib/api-helpers';
-import type { LabDraw } from '@/lib/types';
+import type { LabDraw, Provider } from '@/lib/types';
+
+function resolveOrderingProvider(
+  orderedBy: string | undefined,
+  providers: Provider[],
+): string | undefined {
+  if (!orderedBy) return undefined;
+  const match = providers.find(p =>
+    orderedBy.toLowerCase().includes(p.name.toLowerCase().replace(/^dr\.?\s*/i, '')) ||
+    p.name.toLowerCase().includes(orderedBy.toLowerCase().replace(/,?\s*md$/i, '').replace(/^dr\.?\s*/i, ''))
+  );
+  if (match?.practice) return match.practice;
+  return orderedBy;
+}
 
 export async function GET(request: NextRequest) {
-  const draws = await kvGet<LabDraw[]>('vitals:labs') ?? [];
+  const [draws, providers] = await Promise.all([
+    kvGet<LabDraw[]>('vitals:labs').then(d => d ?? []),
+    kvGet<Provider[]>('vitals:providers').then(p => p ?? []),
+  ]);
   const { searchParams } = request.nextUrl;
   const from = searchParams.get('from');
   const to = searchParams.get('to');
@@ -26,7 +42,13 @@ export async function GET(request: NextRequest) {
   // Sort by date descending
   filtered.sort((a, b) => b.date.localeCompare(a.date));
 
-  return NextResponse.json(filtered);
+  // Enrich with resolved provider practice names
+  const enriched = filtered.map(d => ({
+    ...d,
+    orderedBy: resolveOrderingProvider(d.orderedBy, providers) ?? d.orderedBy,
+  }));
+
+  return NextResponse.json(enriched);
 }
 
 export async function POST(request: NextRequest) {

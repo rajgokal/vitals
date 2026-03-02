@@ -67,6 +67,7 @@ export interface Interaction {
 export interface LabDraw {
   date: string;
   source: string;
+  orderedBy?: string;
   markers: LabMarker[];
 }
 

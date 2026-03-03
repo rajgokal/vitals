@@ -29,15 +29,42 @@ function formatDocType(type: string) {
 export default function RecordsClient({ records }: { records: MedicalRecord[] }) {
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [sortOption, setSortOption] = useState('newest');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const types = Array.from(new Set(records.map(r => r.documentType))).sort();
   const statuses = Array.from(new Set(records.map(r => r.status))).sort();
 
-  const filtered = records.filter(r =>
-    (typeFilter === 'all' || r.documentType === typeFilter) &&
-    (statusFilter === 'all' || r.status === statusFilter)
-  );
+  // Helper function to safely get date values for sorting
+  const getSafeDate = (dateStr: string | undefined): number => {
+    if (!dateStr) return 0; // Invalid dates sort last
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? 0 : d.getTime();
+  };
+
+  const filtered = records
+    .filter(r =>
+      (typeFilter === 'all' || r.documentType === typeFilter) &&
+      (statusFilter === 'all' || r.status === statusFilter)
+    )
+    .sort((a, b) => {
+      switch (sortOption) {
+        case 'newest':
+          return getSafeDate(b.uploadedAt) - getSafeDate(a.uploadedAt);
+        case 'oldest':
+          return getSafeDate(a.uploadedAt) - getSafeDate(b.uploadedAt);
+        case 'date-range-newest':
+          return getSafeDate(b.dateRange?.end) - getSafeDate(a.dateRange?.end);
+        case 'date-range-oldest':
+          return getSafeDate(a.dateRange?.start) - getSafeDate(b.dateRange?.start);
+        case 'filename-asc':
+          return a.filename.localeCompare(b.filename);
+        case 'filename-desc':
+          return b.filename.localeCompare(a.filename);
+        default:
+          return getSafeDate(b.uploadedAt) - getSafeDate(a.uploadedAt);
+      }
+    });
 
   return (
     <div className="space-y-4">
@@ -62,9 +89,21 @@ export default function RecordsClient({ records }: { records: MedicalRecord[] })
             <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
           ))}
         </select>
-        {(typeFilter !== 'all' || statusFilter !== 'all') && (
+        <select
+          value={sortOption}
+          onChange={e => setSortOption(e.target.value)}
+          className="text-xs bg-card border border-border rounded-lg px-3 py-1.5 text-foreground"
+        >
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="date-range-newest">Date range (newest)</option>
+          <option value="date-range-oldest">Date range (oldest)</option>
+          <option value="filename-asc">Filename A-Z</option>
+          <option value="filename-desc">Filename Z-A</option>
+        </select>
+        {(typeFilter !== 'all' || statusFilter !== 'all' || sortOption !== 'newest') && (
           <button
-            onClick={() => { setTypeFilter('all'); setStatusFilter('all'); }}
+            onClick={() => { setTypeFilter('all'); setStatusFilter('all'); setSortOption('newest'); }}
             className="text-xs text-muted hover:text-foreground transition-colors"
           >
             Clear filters

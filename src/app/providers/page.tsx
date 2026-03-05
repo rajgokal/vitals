@@ -1,5 +1,6 @@
 import Nav from '@/components/Nav';
 import ProviderCard from '@/components/ProviderCard';
+import PrivacyToggle from '@/components/PrivacyToggle';
 import { kvGet } from '@/lib/kv';
 import type { Provider } from '@/lib/types';
 
@@ -14,7 +15,10 @@ export default async function ProvidersPage() {
       <main className="flex-1 pb-20 md:pb-0">
         <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold tracking-tight">Care Team</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-semibold tracking-tight">Care Team</h1>
+              <PrivacyToggle />
+            </div>
             {providers.length > 0 && (
               <span className="text-xs text-muted">{providers.length} provider{providers.length !== 1 ? 's' : ''}</span>
             )}

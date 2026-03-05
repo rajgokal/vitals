@@ -1,7 +1,7 @@
 import Nav from '@/components/Nav';
+import PrivacyToggle from '@/components/PrivacyToggle';
 import { kvGet } from '@/lib/kv';
 import type { MedicalRecord } from '@/lib/types';
-import { formatDate } from '@/lib/utils';
 import RecordsClient from './RecordsClient';
 
 export const dynamic = 'force-dynamic';
@@ -31,7 +31,10 @@ export default async function RecordsPage() {
       <main className="flex-1 pb-20 md:pb-0">
         <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-6">
           <header className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold tracking-tight">Records</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-semibold tracking-tight">Records</h1>
+              <PrivacyToggle />
+            </div>
             <span className="text-xs text-muted">{records.length} document{records.length !== 1 ? 's' : ''}</span>
           </header>
 

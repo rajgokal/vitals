@@ -13,6 +13,7 @@ import {
   Activity,
   FolderOpen,
   HeartPulse,
+  Shield,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -31,6 +32,7 @@ const links: NavLink[] = [
   { href: '/providers', label: 'Team', Icon: Users },
   { href: '/wearables', label: 'Wearables', Icon: Activity },
   { href: '/records', label: 'Records', Icon: FolderOpen },
+  { href: '/alerts', label: 'Alerts', Icon: Shield },
 ];
 
 export default function Nav() {

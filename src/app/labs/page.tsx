@@ -4,10 +4,12 @@ import { useEffect, useState, useMemo } from 'react';
 import Nav from '@/components/Nav';
 import CompactMarkerRow from '@/components/CompactMarkerRow';
 import LabsSort from '@/components/LabsSort';
+import PrivacyToggle from '@/components/PrivacyToggle';
 import type { SortMode, FilterMode } from '@/components/LabsSort';
 import type { LatestMarker } from '@/app/api/labs/latest-all/route';
 import type { LabDraw } from '@/lib/types';
-import { formatDate } from '@/lib/utils';
+import { formatDate, relativeDate } from '@/lib/utils';
+import { usePrivacy } from '@/context/PrivacyContext';
 import Link from 'next/link';
 
 interface LatestAllResponse {
@@ -21,6 +23,7 @@ export default function LabsPage() {
   const [error, setError] = useState(false);
   const [sort, setSort] = useState<SortMode>('frequency');
   const [filter, setFilter] = useState<FilterMode>('all');
+  const { isPrivate } = usePrivacy();
 
   useEffect(() => {
     fetch('/api/labs/latest-all')
@@ -64,7 +67,10 @@ export default function LabsPage() {
       <main className="flex-1 pb-20 md:pb-0">
         <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold tracking-tight">Labs</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-semibold tracking-tight">Labs</h1>
+              <PrivacyToggle />
+            </div>
             {markers.length > 0 && (
               <span className="text-xs text-muted">{processed.length} markers</span>
             )}
@@ -121,9 +127,9 @@ export default function LabsPage() {
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium">{formatDate(draw.date)}</p>
+                          <p className="text-sm font-medium">{isPrivate ? relativeDate(draw.date) : formatDate(draw.date)}</p>
                           <p className="text-xs text-muted mt-0.5">
-                            {draw.orderedBy && !draw.source.toLowerCase().includes(draw.orderedBy.toLowerCase())
+                            {!isPrivate && draw.orderedBy && !draw.source.toLowerCase().includes(draw.orderedBy.toLowerCase())
                               ? `${draw.orderedBy} · ` : ''}{draw.source} · {draw.markers.length} markers
                           </p>
                         </div>

@@ -122,3 +122,32 @@ export interface Immunization {
   lot?: string;
   notes?: string;
 }
+
+export type AlertSeverity = 'critical' | 'warning' | 'info';
+export type AlertStatus = 'active' | 'dismissed' | 'resolved' | 'expired';
+export type AlertCategory = 
+  | 'lab_out_of_range' | 'lab_trend' | 'medication_safety' 
+  | 'genetic_safety' | 'screening_due' | 'wearable_anomaly' | 'body_composition';
+
+export interface Alert {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  category: AlertCategory;
+  severity: AlertSeverity;
+  status: AlertStatus;
+  title: string;
+  message: string;
+  source?: {
+    type: string;
+    markers?: string[];
+    dates?: string[];
+  };
+  relatedProviders?: string[];
+  relatedMedications?: string[];
+  actionItems?: string[];
+  dismissedAt?: string | null;
+  dismissedBy?: string | null;
+  expiresAt?: string | null;
+  tags?: string[];
+}

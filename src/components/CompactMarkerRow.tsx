@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import type { LabMarker } from '@/lib/types';
-import { flagColor } from '@/lib/utils';
+import { flagColor, relativeDate } from '@/lib/utils';
 import { getMarkerExplanation } from '@/lib/marker-explanations';
 import { resolveRange } from '@/lib/marker-ranges';
+import { usePrivacy } from '@/context/PrivacyContext';
 import MarkerTrend from './MarkerTrend';
 
 interface CompactMarkerRowProps {
@@ -20,6 +21,7 @@ function formatShortDate(dateStr: string): string {
 
 export default function CompactMarkerRow({ marker, date, historyCount }: CompactMarkerRowProps) {
   const [expanded, setExpanded] = useState(false);
+  const { isPrivate } = usePrivacy();
 
   const resolved = resolveRange(marker.name, marker.referenceRange, marker.range);
   const explanation = getMarkerExplanation(marker.name);
@@ -47,7 +49,7 @@ export default function CompactMarkerRow({ marker, date, historyCount }: Compact
             {marker.value} <span className="text-[10px] text-muted">{marker.unit}</span>
           </span>
           {date && (
-            <span className="text-[10px] text-muted hidden sm:inline">{formatShortDate(date)}</span>
+            <span className="text-[10px] text-muted hidden sm:inline">{isPrivate ? relativeDate(date) : formatShortDate(date)}</span>
           )}
           {marker.flag && (
             <span className={`text-[10px] font-semibold uppercase px-1 py-px rounded ${flagColor(marker.flag)} bg-current/10`}>

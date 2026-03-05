@@ -1,8 +1,11 @@
 import Nav from '@/components/Nav';
+import AlertBanner from '@/components/AlertBanner';
 import ProfileCard from '@/components/ProfileCard';
 import MedsCard from '@/components/MedsCard';
 import SupplementsCard from '@/components/SupplementsCard';
 import LabsCard from '@/components/LabsCard';
+import PrivacyToggle from '@/components/PrivacyToggle';
+import DashboardStats from '@/components/DashboardStats';
 import { kvGet } from '@/lib/kv';
 import type { Profile, Medication, Supplement, LabDraw } from '@/lib/types';
 
@@ -24,24 +27,30 @@ export default async function Dashboard() {
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
       <Nav />
-      <main className="flex-1 pb-20 md:pb-0">
-        <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-6">
-          <header className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold tracking-tight">Health Overview</h1>
-            <div className="flex gap-4 text-xs text-muted">
-              <span>{labCount} lab draws</span>
-              <span>{activeMeds} active meds</span>
-              {lastDraw && <span>Last draw {lastDraw.date}</span>}
+      <div className="flex-1 flex flex-col">
+        <AlertBanner />
+        <main className="flex-1 pb-20 md:pb-0">
+          <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-6">
+            <header className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl font-semibold tracking-tight">Health Overview</h1>
+                <PrivacyToggle />
+              </div>
+              <DashboardStats
+                labCount={labCount}
+                activeMeds={activeMeds}
+                lastDrawDate={lastDraw?.date}
+              />
+            </header>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ProfileCard profile={profile} />
+              <MedsCard medications={medications} />
+              <SupplementsCard supplements={supplements} />
+              <LabsCard />
             </div>
-          </header>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <ProfileCard profile={profile} />
-            <MedsCard medications={medications} />
-            <SupplementsCard supplements={supplements} />
-            <LabsCard />
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

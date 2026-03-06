@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Filter, RotateCcw } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AlertCard from './AlertCard';
 import type { Alert, AlertSeverity, AlertCategory } from '@/lib/types';
+import { usePrivacy } from '@/context/PrivacyContext';
+import { fakeAlerts } from '@/lib/fake-persona';
 
 const severityOptions: { value: AlertSeverity | '', label: string }[] = [
   { value: '', label: 'All Severities' },
@@ -30,9 +32,22 @@ export default function AlertPanel() {
   const [showDismissed, setShowDismissed] = useState(false);
   const [selectedSeverity, setSelectedSeverity] = useState<AlertSeverity | ''>('');
   const [selectedCategory, setSelectedCategory] = useState<AlertCategory | ''>('');
+  const { isPrivate } = usePrivacy();
 
   const fetchAlerts = async () => {
     setLoading(true);
+
+    if (isPrivate) {
+      let filtered = showDismissed
+        ? [] // fake persona has no dismissed alerts
+        : fakeAlerts.filter(a => a.status === 'active');
+      if (selectedSeverity) filtered = filtered.filter(a => a.severity === selectedSeverity);
+      if (selectedCategory) filtered = filtered.filter(a => a.category === selectedCategory);
+      setAlerts(filtered);
+      setLoading(false);
+      return;
+    }
+
     try {
       const params = new URLSearchParams();
       params.set('status', showDismissed ? 'dismissed' : 'active');
@@ -52,15 +67,19 @@ export default function AlertPanel() {
 
   useEffect(() => {
     fetchAlerts();
-  }, [showDismissed, selectedSeverity, selectedCategory]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showDismissed, selectedSeverity, selectedCategory, isPrivate]);
 
   const handleDismissAlert = async (alertId: string) => {
+    if (isPrivate) {
+      setAlerts(prev => prev.filter(a => a.id !== alertId));
+      return;
+    }
+
     try {
       const response = await fetch('/api/alerts', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: alertId,
           status: 'dismissed',
@@ -70,7 +89,6 @@ export default function AlertPanel() {
       });
 
       if (response.ok) {
-        // Refresh the alerts list
         await fetchAlerts();
       } else {
         throw new Error('Failed to dismiss alert');
@@ -82,12 +100,12 @@ export default function AlertPanel() {
   };
 
   const handleReactivateAlert = async (alertId: string) => {
+    if (isPrivate) return;
+
     try {
       const response = await fetch('/api/alerts', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: alertId,
           status: 'active',
@@ -97,7 +115,6 @@ export default function AlertPanel() {
       });
 
       if (response.ok) {
-        // Refresh the alerts list
         await fetchAlerts();
       } else {
         throw new Error('Failed to reactivate alert');
@@ -108,7 +125,6 @@ export default function AlertPanel() {
     }
   };
 
-  // Group alerts by category
   const groupedAlerts = alerts.reduce((groups, alert) => {
     const category = alert.category;
     if (!groups[category]) {
@@ -139,9 +155,7 @@ export default function AlertPanel() {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-medium text-muted mb-2">
-              Status
-            </label>
+            <label className="block text-xs font-medium text-muted mb-2">Status</label>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowDismissed(false)}
@@ -169,9 +183,7 @@ export default function AlertPanel() {
           </div>
           
           <div>
-            <label htmlFor="severity-filter" className="block text-xs font-medium text-muted mb-2">
-              Severity
-            </label>
+            <label htmlFor="severity-filter" className="block text-xs font-medium text-muted mb-2">Severity</label>
             <select
               id="severity-filter"
               value={selectedSeverity}
@@ -179,17 +191,13 @@ export default function AlertPanel() {
               className="w-full px-3 py-1.5 text-xs bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
             >
               {severityOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
+                <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
           </div>
           
           <div>
-            <label htmlFor="category-filter" className="block text-xs font-medium text-muted mb-2">
-              Category
-            </label>
+            <label htmlFor="category-filter" className="block text-xs font-medium text-muted mb-2">Category</label>
             <select
               id="category-filter"
               value={selectedCategory}
@@ -197,9 +205,7 @@ export default function AlertPanel() {
               className="w-full px-3 py-1.5 text-xs bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
             >
               {categoryOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
+                <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
           </div>

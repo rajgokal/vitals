@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import type { MedicalRecord } from '@/lib/types';
-import { formatDate, relativeDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import { usePrivacy } from '@/context/PrivacyContext';
-import { anonymizeFilename } from '@/lib/anonymize';
+import { fakeRecords } from '@/lib/fake-persona';
 
 const DOC_TYPE_COLORS: Record<string, string> = {
   lab_report: 'bg-blue-500/20 text-blue-400',
@@ -30,22 +30,23 @@ function formatDocType(type: string) {
 
 export default function RecordsClient({ records }: { records: MedicalRecord[] }) {
   const { isPrivate } = usePrivacy();
+  const data = isPrivate ? fakeRecords : records;
+
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortOption, setSortOption] = useState('newest');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const types = Array.from(new Set(records.map(r => r.documentType))).sort();
-  const statuses = Array.from(new Set(records.map(r => r.status))).sort();
+  const types = Array.from(new Set(data.map(r => r.documentType))).sort();
+  const statuses = Array.from(new Set(data.map(r => r.status))).sort();
 
-  // Helper function to safely get date values for sorting
   const getSafeDate = (dateStr: string | undefined): number => {
-    if (!dateStr) return 0; // Invalid dates sort last
+    if (!dateStr) return 0;
     const d = new Date(dateStr);
     return isNaN(d.getTime()) ? 0 : d.getTime();
   };
 
-  const filtered = records
+  const filtered = data
     .filter(r =>
       (typeFilter === 'all' || r.documentType === typeFilter) &&
       (statusFilter === 'all' || r.status === statusFilter)
@@ -124,7 +125,7 @@ export default function RecordsClient({ records }: { records: MedicalRecord[] })
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="text-sm font-semibold truncate transition-all duration-200">
-                    {isPrivate ? anonymizeFilename(record.documentType) : record.filename}
+                    {record.filename}
                   </p>
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${DOC_TYPE_COLORS[record.documentType] ?? DOC_TYPE_COLORS.other}`}>
                     {formatDocType(record.documentType)}
@@ -142,15 +143,13 @@ export default function RecordsClient({ records }: { records: MedicalRecord[] })
                 <div className="flex flex-wrap gap-3 mt-2 text-xs text-muted transition-all duration-200">
                   {record.dateRange && (
                     <span>
-                      {isPrivate
-                        ? `${relativeDate(record.dateRange.start)} – ${relativeDate(record.dateRange.end)}`
-                        : `${formatDate(record.dateRange.start)} – ${formatDate(record.dateRange.end)}`}
+                      {formatDate(record.dateRange.start)} – {formatDate(record.dateRange.end)}
                     </span>
                   )}
                   {record.recordCount != null && (
                     <span>{record.recordCount} record{record.recordCount !== 1 ? 's' : ''}</span>
                   )}
-                  <span>Uploaded {isPrivate ? relativeDate(record.uploadedAt) : formatDate(record.uploadedAt)}</span>
+                  <span>Uploaded {formatDate(record.uploadedAt)}</span>
                 </div>
                 {record.errors && record.errors.length > 0 && (
                   <div className="mt-2">

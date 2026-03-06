@@ -8,8 +8,9 @@ import PrivacyToggle from '@/components/PrivacyToggle';
 import type { SortMode, FilterMode } from '@/components/LabsSort';
 import type { LatestMarker } from '@/app/api/labs/latest-all/route';
 import type { LabDraw } from '@/lib/types';
-import { formatDate, relativeDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import { usePrivacy } from '@/context/PrivacyContext';
+import { fakeLabs, fakeLatestMarkers } from '@/lib/fake-persona';
 import Link from 'next/link';
 
 interface LatestAllResponse {
@@ -26,6 +27,13 @@ export default function LabsPage() {
   const { isPrivate } = usePrivacy();
 
   useEffect(() => {
+    if (isPrivate) {
+      setMarkerData(fakeLatestMarkers() as LatestAllResponse);
+      setDraws([...fakeLabs].sort((a, b) => b.date.localeCompare(a.date)));
+      setError(false);
+      return;
+    }
+
     fetch('/api/labs/latest-all')
       .then(r => r.json())
       .then(setMarkerData)
@@ -34,7 +42,7 @@ export default function LabsPage() {
       .then(r => r.json())
       .then((d: LabDraw[]) => setDraws(d.sort((a, b) => b.date.localeCompare(a.date))))
       .catch(() => {});
-  }, []);
+  }, [isPrivate]);
 
   const markers = markerData?.markers ?? [];
   const drawCount = markerData?.drawCount ?? 0;
@@ -127,9 +135,9 @@ export default function LabsPage() {
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium">{isPrivate ? relativeDate(draw.date) : formatDate(draw.date)}</p>
+                          <p className="text-sm font-medium">{formatDate(draw.date)}</p>
                           <p className="text-xs text-muted mt-0.5">
-                            {!isPrivate && draw.orderedBy && !draw.source.toLowerCase().includes(draw.orderedBy.toLowerCase())
+                            {draw.orderedBy && !draw.source.toLowerCase().includes(draw.orderedBy.toLowerCase())
                               ? `${draw.orderedBy} · ` : ''}{draw.source} · {draw.markers.length} markers
                           </p>
                         </div>

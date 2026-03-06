@@ -2,8 +2,9 @@
 
 import MarkerRow from '@/components/MarkerRow';
 import PrivacyToggle from '@/components/PrivacyToggle';
-import { formatDate, relativeDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import { usePrivacy } from '@/context/PrivacyContext';
+import { fakeLabs } from '@/lib/fake-persona';
 import type { LabDraw } from '@/lib/types';
 import Link from 'next/link';
 
@@ -14,16 +15,21 @@ interface LabDrawClientProps {
 export default function LabDrawClient({ draw }: LabDrawClientProps) {
   const { isPrivate } = usePrivacy();
 
+  // When private, find the matching fake draw by date, or fall back to the first fake draw
+  const displayDraw = isPrivate
+    ? (fakeLabs.find(d => d.date === draw.date) ?? fakeLabs[0])
+    : draw;
+
   // Group markers by category
-  const categories = new Map<string, typeof draw.markers>();
-  for (const m of draw.markers) {
+  const categories = new Map<string, typeof displayDraw.markers>();
+  for (const m of displayDraw.markers) {
     const cat = m.category || 'General';
     if (!categories.has(cat)) categories.set(cat, []);
     categories.get(cat)!.push(m);
   }
 
-  const displayDate = isPrivate ? relativeDate(draw.date) : formatDate(draw.date);
-  const showOrderedBy = !isPrivate && draw.orderedBy && !draw.source.toLowerCase().includes(draw.orderedBy.toLowerCase());
+  const displayDate = formatDate(displayDraw.date);
+  const showOrderedBy = displayDraw.orderedBy && !displayDraw.source.toLowerCase().includes(displayDraw.orderedBy.toLowerCase());
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-6">
@@ -34,7 +40,7 @@ export default function LabDrawClient({ draw }: LabDrawClientProps) {
         <div>
           <h1 className="text-xl font-semibold tracking-tight transition-all duration-200">{displayDate}</h1>
           <p className="text-sm text-muted transition-all duration-200">
-            {showOrderedBy ? `${draw.orderedBy} · ` : ''}{draw.source} · {draw.markers.length} markers
+            {showOrderedBy ? `${displayDraw.orderedBy} · ` : ''}{displayDraw.source} · {displayDraw.markers.length} markers
           </p>
         </div>
         <PrivacyToggle />

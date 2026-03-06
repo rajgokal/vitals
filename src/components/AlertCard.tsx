@@ -1,11 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, ChevronUp, X, Shield } from 'lucide-react';
+import { ChevronUp, X, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Alert } from '@/lib/types';
-import { usePrivacy } from '@/context/PrivacyContext';
-import { anonymizeAlertText, anonymizeDrugName } from '@/lib/anonymize';
 
 interface AlertCardProps {
   alert: Alert;
@@ -44,7 +42,6 @@ const categoryLabels = {
 export default function AlertCard({ alert, onDismiss, showDismissButton = true }: AlertCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [dismissing, setDismissing] = useState(false);
-  const { isPrivate } = usePrivacy();
   
   const config = severityConfig[alert.severity];
   const isPermanent = alert.category === 'genetic_safety' && alert.severity === 'critical';
@@ -90,24 +87,19 @@ export default function AlertCard({ alert, onDismiss, showDismissButton = true }
           </h3>
           
           <div className="text-sm text-muted leading-relaxed transition-all duration-200">
-            {(() => {
-              const msg = isPrivate
-                ? anonymizeAlertText(alert.message, alert.relatedProviders, alert.relatedMedications)
-                : alert.message;
-              return expanded ? msg : (
-                <>
-                  {msg.length > 120 ? `${msg.substring(0, 120)}...` : msg}
-                  {msg.length > 120 && (
-                    <button
-                      onClick={() => setExpanded(true)}
-                      className="ml-1 text-accent hover:text-accent-bright text-xs"
-                    >
-                      more
-                    </button>
-                  )}
-                </>
-              );
-            })()}
+            {expanded ? alert.message : (
+              <>
+                {alert.message.length > 120 ? `${alert.message.substring(0, 120)}...` : alert.message}
+                {alert.message.length > 120 && (
+                  <button
+                    onClick={() => setExpanded(true)}
+                    className="ml-1 text-accent hover:text-accent-bright text-xs"
+                  >
+                    more
+                  </button>
+                )}
+              </>
+            )}
           </div>
           
           {expanded && alert.message.length > 120 && (
@@ -145,9 +137,7 @@ export default function AlertCard({ alert, onDismiss, showDismissButton = true }
             <div>
               <span className="text-xs text-muted font-medium">Providers: </span>
               <span className="text-xs text-foreground transition-all duration-200">
-                {isPrivate
-                  ? alert.relatedProviders.map(() => 'Provider').join(', ')
-                  : alert.relatedProviders.join(', ')}
+                {alert.relatedProviders.join(', ')}
               </span>
             </div>
           )}
@@ -156,9 +146,7 @@ export default function AlertCard({ alert, onDismiss, showDismissButton = true }
             <div>
               <span className="text-xs text-muted font-medium">Medications: </span>
               <span className="text-xs text-foreground transition-all duration-200">
-                {isPrivate
-                  ? alert.relatedMedications.map(m => anonymizeDrugName(m)).join(', ')
-                  : alert.relatedMedications.join(', ')}
+                {alert.relatedMedications.join(', ')}
               </span>
             </div>
           )}

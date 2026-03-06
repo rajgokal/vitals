@@ -1,12 +1,18 @@
+'use client';
+
 import type { Supplement } from '@/lib/types';
 import DashboardCard from './DashboardCard';
+import { usePrivacy } from '@/context/PrivacyContext';
+import { fakeSupplements } from '@/lib/fake-persona';
 
 interface SupplementsCardProps {
   supplements: Supplement[] | null;
 }
 
 export default function SupplementsCard({ supplements }: SupplementsCardProps) {
-  const active = supplements?.filter(s => s.status === 'current' || s.active) ?? [];
+  const { isPrivate } = usePrivacy();
+  const data = isPrivate ? fakeSupplements : supplements;
+  const active = data?.filter(s => s.status === 'current' || s.active) ?? [];
 
   return (
     <DashboardCard title="Supplements">

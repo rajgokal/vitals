@@ -5,6 +5,8 @@ import DashboardCard from './DashboardCard';
 import MarkerRow from './MarkerRow';
 import Link from 'next/link';
 import type { LatestMarker } from '@/app/api/labs/latest-all/route';
+import { usePrivacy } from '@/context/PrivacyContext';
+import { fakeLatestMarkers } from '@/lib/fake-persona';
 
 interface LatestAllResponse {
   markers: LatestMarker[];
@@ -14,13 +16,20 @@ interface LatestAllResponse {
 export default function LabsCard() {
   const [data, setData] = useState<LatestAllResponse | null>(null);
   const [error, setError] = useState(false);
+  const { isPrivate } = usePrivacy();
 
   useEffect(() => {
+    if (isPrivate) {
+      setData(fakeLatestMarkers() as LatestAllResponse);
+      setError(false);
+      return;
+    }
+
     fetch('/api/labs/latest-all')
       .then(r => r.json())
       .then(setData)
       .catch(() => setError(true));
-  }, []);
+  }, [isPrivate]);
 
   const markers = data?.markers ?? [];
   const drawCount = data?.drawCount ?? 0;

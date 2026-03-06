@@ -1,22 +1,32 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Nav from '@/components/Nav';
 import TimelineEntry from '@/components/TimelineEntry';
+import PrivacyToggle from '@/components/PrivacyToggle';
+import { usePrivacy } from '@/context/PrivacyContext';
 import { symptomsTimeline } from '@/lib/symptoms-data';
-
-const allTags = Array.from(
-  new Set(symptomsTimeline.flatMap(e => e.tags))
-).sort();
+import { fakeSymptomsTimeline } from '@/lib/fake-persona';
 
 export default function SymptomsPage() {
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const { isPrivate } = usePrivacy();
+
+  const timeline = isPrivate ? fakeSymptomsTimeline : symptomsTimeline;
+
+  // Reset tag filter when privacy mode changes (different tag sets)
+  useEffect(() => { setActiveTag(null); }, [isPrivate]);
+
+  const allTags = useMemo(
+    () => Array.from(new Set(timeline.flatMap(e => e.tags))).sort(),
+    [timeline]
+  );
 
   const filtered = useMemo(
     () => activeTag
-      ? symptomsTimeline.filter(e => e.tags.includes(activeTag))
-      : symptomsTimeline,
-    [activeTag]
+      ? timeline.filter(e => e.tags.includes(activeTag))
+      : timeline,
+    [activeTag, timeline]
   );
 
   return (
@@ -25,11 +35,14 @@ export default function SymptomsPage() {
       <main className="flex-1 pb-20 md:pb-0">
         <div className="max-w-3xl mx-auto px-4 py-6 md:py-10 space-y-6">
           {/* Header */}
-          <div>
-            <h1 className="text-xl font-semibold tracking-tight">Symptoms Timeline</h1>
-            <p className="text-xs text-muted mt-1">
-              {filtered.length} entries · Tap to expand details
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-semibold tracking-tight">Symptoms Timeline</h1>
+              <p className="text-xs text-muted mt-1">
+                {filtered.length} entries · Tap to expand details
+              </p>
+            </div>
+            <PrivacyToggle />
           </div>
 
           {/* Tag filter chips */}

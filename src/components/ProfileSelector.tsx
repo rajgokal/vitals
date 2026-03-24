@@ -153,7 +153,7 @@ export default function ProfileSelector({ profiles, currentProfileId }: ProfileS
     <>
       <MobilePillSelector />
       <DesktopDropdownSelector />
-      {/* Backdrop for mobile */}
+      {/* Backdrop for dropdown */}
       {isOpen && (
         <div 
           className="fixed inset-0 z-40 md:hidden" 

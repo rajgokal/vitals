@@ -43,22 +43,31 @@ export default async function Dashboard({ searchParams }: { searchParams: { prof
         <main className="flex-1 pb-20 md:pb-0">
           <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-6">
             <header className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-4 md:gap-0 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-3">
                   <h1 className="text-xl font-semibold tracking-tight">Health Overview</h1>
                   <PrivacyToggle />
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 order-first md:order-none">
                   <ProfileSelector 
                     profiles={registry.profiles} 
                     currentProfileId={activeProfileId}
                   />
-                  <DashboardStats
-                    labCount={labCount}
-                    activeMeds={activeMeds}
-                    lastDrawDate={lastDraw?.date}
-                  />
+                  <div className="hidden md:block">
+                    <DashboardStats
+                      labCount={labCount}
+                      activeMeds={activeMeds}
+                      lastDrawDate={lastDraw?.date}
+                    />
+                  </div>
                 </div>
+              </div>
+              <div className="md:hidden">
+                <DashboardStats
+                  labCount={labCount}
+                  activeMeds={activeMeds}
+                  lastDrawDate={lastDraw?.date}
+                />
               </div>
             </header>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

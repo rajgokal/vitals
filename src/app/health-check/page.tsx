@@ -7,16 +7,32 @@ export default function HealthCheckPage() {
     {
       id: 'raj',
       name: 'Raj Gokal',
+      dob: '1988-06-06',
       age: 37,
+      sex: 'male',
+      conditions: [],
+      allergies: [],
+      bodyMetrics: { height: '6\'0"', weight: '180 lbs' },
+      geneticFlags: [],
+      updatedAt: new Date().toISOString(),
       relationship: 'self',
-      color: '#4F46E5'
+      color: '#4F46E5',
+      isDefault: true
     },
     {
       id: 'demo',
       name: 'Demo User',
+      dob: '1994-01-01',
       age: 30,
+      sex: 'other',
+      conditions: [],
+      allergies: [],
+      bodyMetrics: { height: '5\'8"', weight: '150 lbs' },
+      geneticFlags: [],
+      updatedAt: new Date().toISOString(),
       relationship: 'demo',
-      color: '#10B981'
+      color: '#10B981',
+      isDemo: true
     }
   ];
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-me';
 const AGENT_API_KEY = process.env.AGENT_API_KEY || '';
+const NEROVIEW_PASSWORD = process.env.NEROVIEW_PASSWORD || '';
 const COOKIE_NAME = 'vitals_session';
 
 const PUBLIC_PATHS = ['/login', '/api/auth'];
@@ -56,6 +57,11 @@ export async function middleware(request: NextRequest) {
       response.headers.set('x-auth-type', 'agent');
       return response;
     }
+  }
+
+  // If no password is configured, allow public access
+  if (!NEROVIEW_PASSWORD) {
+    return NextResponse.next();
   }
 
   // Session cookie

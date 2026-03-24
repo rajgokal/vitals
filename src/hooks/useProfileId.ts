@@ -1,10 +1,19 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export function useProfileId(): string {
   const searchParams = useSearchParams();
-  return searchParams.get('profileId') || 'raj';
+  const [profileId, setProfileId] = useState('raj'); // Default to 'raj' for initial render
+  
+  useEffect(() => {
+    // Only update after hydration
+    const paramValue = searchParams.get('profileId') || 'raj';
+    setProfileId(paramValue);
+  }, [searchParams]);
+  
+  return profileId;
 }
 
 export function apiUrl(path: string, profileId: string): string {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { kvGet, kvSet } from '@/lib/kv';
-import { isAgentRequest } from '@/lib/api-helpers';
+import { kvGetProfileData, kvSetProfileData } from '@/lib/kv';
+import { isAgentRequest, validateRequestProfile } from '@/lib/api-helpers';
 import type { LabDraw, Provider } from '@/lib/types';
 
 function resolveOrderingProvider(
@@ -17,9 +17,14 @@ function resolveOrderingProvider(
 }
 
 export async function GET(request: NextRequest) {
+  const { profileId, isValid } = await validateRequestProfile(request);
+  if (!isValid) {
+    return NextResponse.json({ error: 'Invalid profile ID' }, { status: 400 });
+  }
+
   const [rawDraws, providers] = await Promise.all([
-    kvGet<unknown[]>('vitals:labs').then(d => d ?? []),
-    kvGet<Provider[]>('vitals:providers').then(p => p ?? []),
+    kvGetProfileData<unknown[]>('labs', profileId).then(d => d ?? []),
+    kvGetProfileData<Provider[]>('providers', profileId).then(p => p ?? []),
   ]);
   // Filter out corrupted entries (must have string date + markers array)
   const draws = rawDraws.filter(
@@ -62,12 +67,19 @@ export async function POST(request: NextRequest) {
   if (!isAgentRequest(request)) {
     return NextResponse.json({ error: 'Agent key required' }, { status: 403 });
   }
+
+  const { profileId, isValid } = await validateRequestProfile(request);
+  if (!isValid) {
+    return NextResponse.json({ error: 'Invalid profile ID' }, { status: 400 });
+  }
+
   try {
     const draw: LabDraw = await request.json();
     if (!draw.date || !draw.markers) {
       return NextResponse.json({ error: 'date and markers required' }, { status: 400 });
     }
-    const existing = await kvGet<LabDraw[]>('vitals:labs') ?? [];
+    
+    const existing = await kvGetProfileData<LabDraw[]>('labs', profileId) ?? [];
     // Replace if same date exists, otherwise add
     const idx = existing.findIndex(d => d.date === draw.date);
     if (idx >= 0) {
@@ -75,8 +87,9 @@ export async function POST(request: NextRequest) {
     } else {
       existing.push(draw);
     }
-    await kvSet('vitals:labs', existing);
-    return NextResponse.json({ ok: true });
+    
+    await kvSetProfileData('labs', profileId, existing);
+    return NextResponse.json({ ok: true, profileId });
   } catch {
     return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   }
@@ -86,19 +99,27 @@ export async function PUT(request: NextRequest) {
   if (!isAgentRequest(request)) {
     return NextResponse.json({ error: 'Agent key required' }, { status: 403 });
   }
+
+  const { profileId, isValid } = await validateRequestProfile(request);
+  if (!isValid) {
+    return NextResponse.json({ error: 'Invalid profile ID' }, { status: 400 });
+  }
+
   try {
     const { date, updates } = await request.json() as { date: string; updates: Partial<LabDraw> };
     if (!date) {
       return NextResponse.json({ error: 'date required' }, { status: 400 });
     }
-    const existing = await kvGet<LabDraw[]>('vitals:labs') ?? [];
+    
+    const existing = await kvGetProfileData<LabDraw[]>('labs', profileId) ?? [];
     const idx = existing.findIndex(d => d.date === date);
     if (idx < 0) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
+    
     existing[idx] = { ...existing[idx], ...updates, date };
-    await kvSet('vitals:labs', existing);
-    return NextResponse.json({ ok: true, draw: existing[idx] });
+    await kvSetProfileData('labs', profileId, existing);
+    return NextResponse.json({ ok: true, draw: existing[idx], profileId });
   } catch {
     return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   }
@@ -108,18 +129,26 @@ export async function DELETE(request: NextRequest) {
   if (!isAgentRequest(request)) {
     return NextResponse.json({ error: 'Agent key required' }, { status: 403 });
   }
+
+  const { profileId, isValid } = await validateRequestProfile(request);
+  if (!isValid) {
+    return NextResponse.json({ error: 'Invalid profile ID' }, { status: 400 });
+  }
+
   try {
     const { date } = await request.json() as { date: string };
     if (!date) {
       return NextResponse.json({ error: 'date required' }, { status: 400 });
     }
-    const existing = await kvGet<LabDraw[]>('vitals:labs') ?? [];
+    
+    const existing = await kvGetProfileData<LabDraw[]>('labs', profileId) ?? [];
     const filtered = existing.filter(d => d.date !== date);
     if (filtered.length === existing.length) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
-    await kvSet('vitals:labs', filtered);
-    return NextResponse.json({ ok: true, removed: existing.length - filtered.length });
+    
+    await kvSetProfileData('labs', profileId, filtered);
+    return NextResponse.json({ ok: true, removed: existing.length - filtered.length, profileId });
   } catch {
     return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   }

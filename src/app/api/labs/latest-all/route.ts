@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
-import { kvGet } from '@/lib/kv';
+import { NextRequest, NextResponse } from 'next/server';
+import { kvGetProfileData } from '@/lib/kv';
+import { validateRequestProfile } from '@/lib/api-helpers';
 import type { LabDraw } from '@/lib/types';
 
 export interface LatestMarker {
@@ -15,8 +16,13 @@ export interface LatestMarker {
   historyCount: number;
 }
 
-export async function GET() {
-  const raw = await kvGet<unknown[]>('vitals:labs') ?? [];
+export async function GET(request: NextRequest) {
+  const { profileId, isValid } = await validateRequestProfile(request);
+  if (!isValid) {
+    return NextResponse.json({ error: 'Invalid profile ID' }, { status: 400 });
+  }
+
+  const raw = await kvGetProfileData<unknown[]>('labs', profileId) ?? [];
   // Filter corrupted entries
   const draws = raw.filter(
     (d): d is LabDraw =>

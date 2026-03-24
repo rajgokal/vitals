@@ -1,4 +1,5 @@
 export interface Profile {
+  id: string;
   name: string;
   dob: string;
   age: number;
@@ -8,6 +9,21 @@ export interface Profile {
   bodyMetrics: { height: string; weight: string; bmi?: number; bodyFat?: number };
   geneticFlags: string[];
   updatedAt: string;
+  isActive?: boolean;
+  // Additional fields from multi-profile spec
+  relationship?: string;
+  avatar?: string | null;
+  color?: string;
+  isDefault?: boolean;
+  isDemo?: boolean;
+  pediatric?: boolean;
+  createdAt?: string;
+}
+
+export interface ProfileRegistry {
+  profiles: Profile[];
+  defaultProfileId: string;
+  lastUpdated: string;
 }
 
 export interface Medication {

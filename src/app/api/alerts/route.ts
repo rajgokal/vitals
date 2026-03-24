@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { kvGet, kvSet } from '@/lib/kv';
-import { isAgentRequest } from '@/lib/api-helpers';
+import { kvGetProfileData, kvSetProfileData } from '@/lib/kv';
+import { isAgentRequest, validateRequestProfile } from '@/lib/api-helpers';
 import type { Alert, AlertStatus } from '@/lib/types';
 
 function sortAlerts(alerts: Alert[]): Alert[] {
@@ -26,13 +26,18 @@ function expireAlerts(alerts: Alert[]): Alert[] {
 }
 
 export async function GET(request: NextRequest) {
-  const rawAlerts = await kvGet<Alert[]>('vitals:alerts') ?? [];
+  const { profileId, isValid } = await validateRequestProfile(request);
+  if (!isValid) {
+    return NextResponse.json({ error: 'Invalid profile ID' }, { status: 400 });
+  }
+
+  const rawAlerts = await kvGetProfileData<Alert[]>('alerts', profileId) ?? [];
   const alerts = expireAlerts(rawAlerts);
   
   // Update any expired alerts back to storage
   const hasExpired = alerts.some((alert, index) => alert.status !== rawAlerts[index]?.status);
   if (hasExpired) {
-    await kvSet('vitals:alerts', alerts);
+    await kvSetProfileData('alerts', profileId, alerts);
   }
 
   const { searchParams } = request.nextUrl;
@@ -67,6 +72,11 @@ export async function POST(request: NextRequest) {
   if (!isAgentRequest(request)) {
     return NextResponse.json({ error: 'Agent key required' }, { status: 403 });
   }
+
+  const { profileId, isValid } = await validateRequestProfile(request);
+  if (!isValid) {
+    return NextResponse.json({ error: 'Invalid profile ID' }, { status: 400 });
+  }
   
   try {
     const alert: Alert = await request.json();
@@ -77,7 +87,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
     
-    const existing = await kvGet<Alert[]>('vitals:alerts') ?? [];
+    const existing = await kvGetProfileData<Alert[]>('alerts', profileId) ?? [];
     const existingIndex = existing.findIndex(a => a.id === alert.id);
     
     const now = new Date().toISOString();
@@ -104,16 +114,21 @@ export async function POST(request: NextRequest) {
       existing.push(newAlert);
     }
     
-    await kvSet('vitals:alerts', existing);
+    await kvSetProfileData('alerts', profileId, existing);
     const storedAlert = existing[existingIndex] ?? existing[existing.length - 1];
     
-    return NextResponse.json(storedAlert);
+    return NextResponse.json({ ...storedAlert, profileId });
   } catch {
     return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   }
 }
 
 export async function PUT(request: NextRequest) {
+  const { profileId, isValid } = await validateRequestProfile(request);
+  if (!isValid) {
+    return NextResponse.json({ error: 'Invalid profile ID' }, { status: 400 });
+  }
+
   try {
     const { id, status, dismissedAt, dismissedBy } = await request.json() as {
       id: string;
@@ -126,7 +141,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'id is required' }, { status: 400 });
     }
     
-    const existing = await kvGet<Alert[]>('vitals:alerts') ?? [];
+    const existing = await kvGetProfileData<Alert[]>('alerts', profileId) ?? [];
     const alertIndex = existing.findIndex(alert => alert.id === id);
     
     if (alertIndex < 0) {
@@ -152,9 +167,9 @@ export async function PUT(request: NextRequest) {
     };
     
     existing[alertIndex] = updatedAlert;
-    await kvSet('vitals:alerts', existing);
+    await kvSetProfileData('alerts', profileId, existing);
     
-    return NextResponse.json(updatedAlert);
+    return NextResponse.json({ ...updatedAlert, profileId });
   } catch {
     return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   }
@@ -164,6 +179,11 @@ export async function DELETE(request: NextRequest) {
   if (!isAgentRequest(request)) {
     return NextResponse.json({ error: 'Agent key required' }, { status: 403 });
   }
+
+  const { profileId, isValid } = await validateRequestProfile(request);
+  if (!isValid) {
+    return NextResponse.json({ error: 'Invalid profile ID' }, { status: 400 });
+  }
   
   try {
     const { id } = await request.json() as { id: string };
@@ -172,15 +192,15 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'id is required' }, { status: 400 });
     }
     
-    const existing = await kvGet<Alert[]>('vitals:alerts') ?? [];
+    const existing = await kvGetProfileData<Alert[]>('alerts', profileId) ?? [];
     const filtered = existing.filter(alert => alert.id !== id);
     
     if (filtered.length === existing.length) {
       return NextResponse.json({ error: 'Alert not found' }, { status: 404 });
     }
     
-    await kvSet('vitals:alerts', filtered);
-    return NextResponse.json({ ok: true });
+    await kvSetProfileData('alerts', profileId, filtered);
+    return NextResponse.json({ ok: true, profileId });
   } catch {
     return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   }

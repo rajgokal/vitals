@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
-import { kvGet } from '@/lib/kv';
+import { NextRequest, NextResponse } from 'next/server';
+import { kvGetProfileData } from '@/lib/kv';
+import { validateRequestProfile } from '@/lib/api-helpers';
 import type { LabDraw, Provider } from '@/lib/types';
 
 function resolveOrderingProvider(
@@ -16,13 +17,18 @@ function resolveOrderingProvider(
 }
 
 export async function GET(
-  _request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ date: string }> }
 ) {
+  const { profileId, isValid } = await validateRequestProfile(request);
+  if (!isValid) {
+    return NextResponse.json({ error: 'Invalid profile ID' }, { status: 400 });
+  }
+
   const { date } = await params;
   const [draws, providers] = await Promise.all([
-    kvGet<LabDraw[]>('vitals:labs').then(d => d ?? []),
-    kvGet<Provider[]>('vitals:providers').then(p => p ?? []),
+    kvGetProfileData<LabDraw[]>('labs', profileId).then(d => d ?? []),
+    kvGetProfileData<Provider[]>('providers', profileId).then(p => p ?? []),
   ]);
   const draw = draws.find(d => d.date === date);
   if (!draw) {

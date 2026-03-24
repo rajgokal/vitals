@@ -13,6 +13,7 @@ import type {
 /* ── Profile ─────────────────────────────────────────────────────── */
 
 export const fakeProfile: Profile = {
+  id: 'privacy',
   name: 'Jordan Rivera',
   dob: '1984-03-15',
   age: 42,

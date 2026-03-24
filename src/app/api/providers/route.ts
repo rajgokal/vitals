@@ -1,3 +1,3 @@
-import { createGetHandler, createPostHandler } from '@/lib/api-helpers';
-export const GET = createGetHandler('vitals:providers');
-export const POST = createPostHandler('vitals:providers', { agentOnly: true });
+import { createProfileGetHandler, createProfilePostHandler } from '@/lib/api-helpers';
+export const GET = createProfileGetHandler('providers');
+export const POST = createProfilePostHandler('providers', { agentOnly: true });

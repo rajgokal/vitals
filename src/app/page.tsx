@@ -6,18 +6,28 @@ import SupplementsCard from '@/components/SupplementsCard';
 import LabsCard from '@/components/LabsCard';
 import PrivacyToggle from '@/components/PrivacyToggle';
 import DashboardStats from '@/components/DashboardStats';
-import { kvGet } from '@/lib/kv';
+import { kvGetProfileData, getProfileRegistry } from '@/lib/kv';
 import type { Profile, Medication, Supplement, LabDraw } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Dashboard() {
+export default async function Dashboard({ searchParams }: { searchParams: { profileId?: string } }) {
+  const profileId = searchParams.profileId || 'raj';
+  
+  // Validate profile ID exists
+  const registry = await getProfileRegistry();
+  const validProfile = registry.profiles.find(p => p.id === profileId);
+  const activeProfileId = validProfile ? profileId : registry.defaultProfileId;
+
   const [profile, medications, supplements, labs] = await Promise.all([
-    kvGet<Profile>('vitals:profile'),
-    kvGet<Medication[]>('vitals:medications'),
-    kvGet<Supplement[]>('vitals:supplements'),
-    kvGet<LabDraw[]>('vitals:labs'),
+    kvGetProfileData<Profile>('profile', activeProfileId),
+    kvGetProfileData<Medication[]>('medications', activeProfileId),
+    kvGetProfileData<Supplement[]>('supplements', activeProfileId),
+    kvGetProfileData<LabDraw[]>('labs', activeProfileId),
   ]);
+
+  // If no profile data in profile-specific storage, try to get from registry
+  const displayProfile = profile || validProfile || null;
 
   const sortedLabs = labs?.sort((a, b) => b.date.localeCompare(a.date)) ?? null;
   const activeMeds = medications?.filter(m => m.status === 'current' || m.active).length ?? 0;
@@ -43,7 +53,7 @@ export default async function Dashboard() {
               />
             </header>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <ProfileCard profile={profile} />
+              <ProfileCard profile={displayProfile} />
               <MedsCard medications={medications} />
               <SupplementsCard supplements={supplements} />
               <LabsCard />

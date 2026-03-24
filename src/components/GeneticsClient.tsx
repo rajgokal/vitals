@@ -3,6 +3,7 @@
 import GeneticsPanel from './GeneticsPanel';
 import InteractionsTable from './InteractionsTable';
 import PrivacyToggle from './PrivacyToggle';
+import PageHeader from './PageHeader';
 import { usePrivacy } from '@/context/PrivacyContext';
 import { fakeGenetics, fakeInteractions } from '@/lib/fake-persona';
 import type { GeneticsPanel as GeneticsPanelType, Interaction } from '@/lib/types';
@@ -19,10 +20,9 @@ export default function GeneticsClient({ genetics, interactions }: GeneticsClien
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-6">
-      <div className="flex items-center gap-3">
-        <h1 className="text-xl font-semibold tracking-tight">Genetics & Interactions</h1>
+      <PageHeader title="Genetics & Interactions">
         <PrivacyToggle />
-      </div>
+      </PageHeader>
       <GeneticsPanel genetics={displayGenetics} />
       <InteractionsTable interactions={displayInteractions} />
     </div>

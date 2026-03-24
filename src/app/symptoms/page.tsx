@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import Nav from '@/components/Nav';
 import TimelineEntry from '@/components/TimelineEntry';
 import PrivacyToggle from '@/components/PrivacyToggle';
+import PageHeader from '@/components/PageHeader';
 import { usePrivacy } from '@/context/PrivacyContext';
 import { symptomsTimeline } from '@/lib/symptoms-data';
 import { fakeSymptomsTimeline } from '@/lib/fake-persona';
@@ -37,12 +38,13 @@ export default function SymptomsPage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-semibold tracking-tight">Symptoms Timeline</h1>
+              <PageHeader title="Symptoms Timeline">
+                <PrivacyToggle />
+              </PageHeader>
               <p className="text-xs text-muted mt-1">
                 {filtered.length} entries · Tap to expand details
               </p>
             </div>
-            <PrivacyToggle />
           </div>
 
           {/* Tag filter chips */}

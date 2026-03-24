@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { ChevronDown, User, Users, Baby } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Profile } from '@/lib/types';
@@ -30,12 +30,13 @@ function getProfileIcon(relationship?: string) {
 export default function ProfileSelector({ profiles, currentProfileId }: ProfileSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   
   const currentProfile = profiles.find(p => p.id === currentProfileId);
   
   const handleProfileChange = (profileId: string) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     if (profileId === 'raj') {
       // Remove profileId param for default profile
       params.delete('profileId');
@@ -43,7 +44,8 @@ export default function ProfileSelector({ profiles, currentProfileId }: ProfileS
       params.set('profileId', profileId);
     }
     
-    const newUrl = params.toString() ? `/?${params.toString()}` : '/';
+    const qs = params.toString();
+    const newUrl = qs ? `${pathname}?${qs}` : pathname;
     router.push(newUrl);
     setIsOpen(false);
   };

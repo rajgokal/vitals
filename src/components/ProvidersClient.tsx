@@ -3,6 +3,7 @@
 import type { Provider } from '@/lib/types';
 import ProviderCard from './ProviderCard';
 import PrivacyToggle from './PrivacyToggle';
+import PageHeader from './PageHeader';
 import { usePrivacy } from '@/context/PrivacyContext';
 import { fakeProviders } from '@/lib/fake-persona';
 
@@ -17,10 +18,9 @@ export default function ProvidersClient({ providers }: ProvidersClientProps) {
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-semibold tracking-tight">Care Team</h1>
+        <PageHeader title="Care Team">
           <PrivacyToggle />
-        </div>
+        </PageHeader>
         {data.length > 0 && (
           <span className="text-xs text-muted">{data.length} provider{data.length !== 1 ? 's' : ''}</span>
         )}

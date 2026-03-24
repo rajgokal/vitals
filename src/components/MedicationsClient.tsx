@@ -5,6 +5,7 @@ import { formatDate } from '@/lib/utils';
 import { usePrivacy } from '@/context/PrivacyContext';
 import { fakeMedications } from '@/lib/fake-persona';
 import PrivacyToggle from './PrivacyToggle';
+import PageHeader from './PageHeader';
 
 interface MedicationsClientProps {
   active: Medication[];
@@ -20,10 +21,9 @@ export default function MedicationsClient({ active, historical }: MedicationsCli
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-8">
-      <div className="flex items-center gap-3">
-        <h1 className="text-xl font-semibold tracking-tight">Medications</h1>
+      <PageHeader title="Medications">
         <PrivacyToggle />
-      </div>
+      </PageHeader>
 
       <section>
         <div className="flex items-center gap-2 mb-3">

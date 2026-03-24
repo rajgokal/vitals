@@ -1,9 +1,12 @@
+'use client';
+
 import Nav from '@/components/Nav';
 import AlertBanner from '@/components/AlertBanner';
 import AlertPanel from '@/components/AlertPanel';
 import PrivacyToggle from '@/components/PrivacyToggle';
+import PageHeader from '@/components/PageHeader';
 
-export const dynamic = 'force-dynamic';
+
 
 export default function AlertsPage() {
   return (
@@ -15,12 +18,13 @@ export default function AlertsPage() {
           <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-6">
             <header className="flex items-center justify-between">
               <div>
-                <h1 className="text-xl font-semibold tracking-tight">Health Alerts</h1>
+                <PageHeader title="Health Alerts">
+                  <PrivacyToggle />
+                </PageHeader>
                 <p className="text-sm text-muted mt-1">
                   Monitor health alerts, flags, and action items
                 </p>
               </div>
-              <PrivacyToggle />
             </header>
             
             <AlertPanel />

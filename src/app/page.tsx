@@ -6,6 +6,7 @@ import SupplementsCard from '@/components/SupplementsCard';
 import LabsCard from '@/components/LabsCard';
 import PrivacyToggle from '@/components/PrivacyToggle';
 import DashboardStats from '@/components/DashboardStats';
+import ProfileSelector from '@/components/ProfileSelector';
 import { kvGetProfileData, getProfileRegistry } from '@/lib/kv';
 import type { Profile, Medication, Supplement, LabDraw } from '@/lib/types';
 
@@ -41,16 +42,24 @@ export default async function Dashboard({ searchParams }: { searchParams: { prof
         <AlertBanner />
         <main className="flex-1 pb-20 md:pb-0">
           <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-6">
-            <header className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <h1 className="text-xl font-semibold tracking-tight">Health Overview</h1>
-                <PrivacyToggle />
+            <header className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <h1 className="text-xl font-semibold tracking-tight">Health Overview</h1>
+                  <PrivacyToggle />
+                </div>
+                <div className="flex items-center gap-3">
+                  <ProfileSelector 
+                    profiles={registry.profiles} 
+                    currentProfileId={activeProfileId}
+                  />
+                  <DashboardStats
+                    labCount={labCount}
+                    activeMeds={activeMeds}
+                    lastDrawDate={lastDraw?.date}
+                  />
+                </div>
               </div>
-              <DashboardStats
-                labCount={labCount}
-                activeMeds={activeMeds}
-                lastDrawDate={lastDraw?.date}
-              />
             </header>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <ProfileCard profile={displayProfile} />

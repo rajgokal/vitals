@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { ChevronDown, User, Users, Baby } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Profile } from '@/lib/types';
@@ -29,24 +29,43 @@ function getProfileIcon(relationship?: string) {
 
 export default function ProfileSelector({ profiles, currentProfileId }: ProfileSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
+  
+  // Fix hydration mismatch by only running client-side code after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const currentProfile = profiles.find(p => p.id === currentProfileId);
   
   const handleProfileChange = (profileId: string) => {
-    const params = new URLSearchParams(searchParams);
+    if (!mounted) return;
+    
+    // Get current search params from window.location instead of useSearchParams hook
+    const currentParams = new URLSearchParams(window.location.search);
+    
     if (profileId === 'raj') {
       // Remove profileId param for default profile
-      params.delete('profileId');
+      currentParams.delete('profileId');
     } else {
-      params.set('profileId', profileId);
+      currentParams.set('profileId', profileId);
     }
     
-    const newUrl = params.toString() ? `/?${params.toString()}` : '/';
+    const newUrl = currentParams.toString() ? `/?${currentParams.toString()}` : '/';
     router.push(newUrl);
     setIsOpen(false);
   };
+
+  // Don't render the interactive elements until mounted to avoid hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="flex gap-2 md:hidden">
+        <div className="w-16 h-7 bg-card rounded-full animate-pulse" />
+        <div className="w-16 h-7 bg-card rounded-full animate-pulse" />
+      </div>
+    );
+  }
 
   // For mobile: pill design
   const MobilePillSelector = () => (

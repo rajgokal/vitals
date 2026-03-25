@@ -5,7 +5,7 @@ const AGENT_API_KEY = process.env.AGENT_API_KEY || '';
 const NEROVIEW_PASSWORD = process.env.NEROVIEW_PASSWORD || '';
 const COOKIE_NAME = 'vitals_session';
 
-const PUBLIC_PATHS = ['/login', '/api/auth'];
+const PUBLIC_PATHS = ['/login', '/api/auth', '/api/health'];
 
 async function hmacSign(payload: string): Promise<string> {
   const enc = new TextEncoder();

@@ -17,13 +17,16 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem('vitals:privacy');
-    if (stored === 'true') setIsPrivate(true);
+    // Only access localStorage on the client side
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('vitals:privacy');
+      if (stored === 'true') setIsPrivate(true);
+    }
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    if (mounted) {
+    if (mounted && typeof window !== 'undefined') {
       localStorage.setItem('vitals:privacy', String(isPrivate));
     }
   }, [isPrivate, mounted]);

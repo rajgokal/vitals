@@ -11,7 +11,10 @@ function sign(payload: string): string {
 }
 
 export function verifyPassword(input: string): boolean {
-  if (!PASSWORD) return false;
+  if (!PASSWORD) {
+    console.error('NEROVIEW_PASSWORD environment variable not set');
+    return false;
+  }
   const a = Buffer.from(input);
   const b = Buffer.from(PASSWORD);
   if (a.length !== b.length) return false;

@@ -11,10 +11,19 @@ function sign(payload: string): string {
 }
 
 export function verifyPassword(input: string): boolean {
+  // Fallback password for emergency access (should be removed after env vars are fixed)
+  const FALLBACK_PASSWORD = 'vitals2026emergency';
+  
   if (!PASSWORD) {
     console.error('NEROVIEW_PASSWORD environment variable not set');
+    // Use fallback password only if environment password is not set
+    if (input === FALLBACK_PASSWORD) {
+      console.log('Using fallback emergency password');
+      return true;
+    }
     return false;
   }
+  
   const a = Buffer.from(input);
   const b = Buffer.from(PASSWORD);
   if (a.length !== b.length) return false;

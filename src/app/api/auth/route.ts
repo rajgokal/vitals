@@ -4,6 +4,14 @@ import { verifyPassword, createSessionToken, COOKIE_NAME } from '@/lib/auth';
 export async function POST(request: NextRequest) {
   try {
     const { password } = await request.json();
+    
+    // Debug: log password verification status
+    console.log('Auth attempt:', {
+      hasPassword: !!password,
+      envPasswordSet: !!process.env.NEROVIEW_PASSWORD,
+      envPasswordValue: process.env.NEROVIEW_PASSWORD ? '[SET]' : '[EMPTY]'
+    });
+    
     if (!password || !verifyPassword(password)) {
       return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
     }
@@ -18,7 +26,8 @@ export async function POST(request: NextRequest) {
       maxAge: 60 * 60 * 24 * 30, // 30 days
     });
     return response;
-  } catch {
+  } catch (error) {
+    console.error('Auth error:', error);
     return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   }
 }

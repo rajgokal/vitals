@@ -20,34 +20,67 @@ function DashboardContent() {
   const [supplements, setSupplements] = useState<Supplement[] | null>(null);
   const [labs, setLabs] = useState<LabDraw[] | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Don't fetch if profileId is still default during hydration
+    if (!profileId) return;
+    
     setLoading(true);
+    setError(null);
 
     const profilePromise = fetch('/api/profiles')
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`Profiles API error: ${r.status}`);
+        return r.json();
+      })
       .then((reg: ProfileRegistry) => {
         const p = reg.profiles.find(pr => pr.id === profileId);
         setProfile(p || null);
       })
-      .catch(() => setProfile(null));
+      .catch((err) => {
+        console.error('Error fetching profiles:', err);
+        setProfile(null);
+      });
 
     const medsPromise = fetch(apiUrl('/api/medications', profileId))
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`Medications API error: ${r.status}`);
+        return r.json();
+      })
       .then((data: Medication[]) => setMedications(data ?? []))
-      .catch(() => setMedications([]));
+      .catch((err) => {
+        console.error('Error fetching medications:', err);
+        setMedications([]);
+      });
 
     const supplementsPromise = fetch(apiUrl('/api/supplements', profileId))
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`Supplements API error: ${r.status}`);
+        return r.json();
+      })
       .then((data: Supplement[]) => setSupplements(data ?? []))
-      .catch(() => setSupplements([]));
+      .catch((err) => {
+        console.error('Error fetching supplements:', err);
+        setSupplements([]);
+      });
 
     const labsPromise = fetch(apiUrl('/api/labs', profileId))
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`Labs API error: ${r.status}`);
+        return r.json();
+      })
       .then((data: LabDraw[]) => setLabs(data ?? []))
-      .catch(() => setLabs([]));
+      .catch((err) => {
+        console.error('Error fetching labs:', err);
+        setLabs([]);
+      });
 
     Promise.all([profilePromise, medsPromise, supplementsPromise, labsPromise])
+      .catch((err) => {
+        console.error('Dashboard data fetch error:', err);
+        setError('Failed to load dashboard data. Please refresh the page.');
+      })
       .finally(() => setLoading(false));
   }, [profileId]);
 
@@ -73,7 +106,17 @@ function DashboardContent() {
           </>
         )}
       </header>
-      {loading ? (
+      {error ? (
+        <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <p className="text-red-800 dark:text-red-200">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-2 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+          >
+            Refresh
+          </button>
+        </div>
+      ) : loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="skeleton h-40 w-full rounded-xl" />

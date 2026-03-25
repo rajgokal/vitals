@@ -12,7 +12,7 @@ interface SupplementsCardProps {
 export default function SupplementsCard({ supplements }: SupplementsCardProps) {
   const { isPrivate } = usePrivacy();
   const data = isPrivate ? fakeSupplements : supplements;
-  const active = data?.filter(s => s.status === 'current' || s.active) ?? [];
+  const active = Array.isArray(data) ? data.filter(s => s.status === 'current' || s.active) : [];
 
   return (
     <DashboardCard title="Supplements">

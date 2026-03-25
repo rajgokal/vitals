@@ -25,8 +25,8 @@ export default function SymptomsPage() {
 
   const filtered = useMemo(
     () => activeTag
-      ? timeline.filter(e => e.tags.includes(activeTag))
-      : timeline,
+      ? (Array.isArray(timeline) ? timeline.filter(e => e.tags.includes(activeTag)) : [])
+      : (Array.isArray(timeline) ? timeline : []),
     [activeTag, timeline]
   );
 

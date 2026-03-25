@@ -13,7 +13,7 @@ interface MedsCardProps {
 export default function MedsCard({ medications }: MedsCardProps) {
   const { isPrivate } = usePrivacy();
   const meds = isPrivate ? fakeMedications : medications;
-  const active = meds?.filter(m => m.status === 'current' || m.active) ?? [];
+  const active = Array.isArray(meds) ? meds.filter(m => m.status === 'current' || m.active) : [];
 
   return (
     <DashboardCard

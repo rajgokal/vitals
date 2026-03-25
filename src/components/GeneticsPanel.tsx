@@ -30,7 +30,7 @@ export default function GeneticsPanel({ genetics }: GeneticsPanelProps) {
     <div className="space-y-6">
       <DashboardCard title="CYP Enzymes">
         <div className="space-y-0">
-          {genetics.enzymes.map(e => (
+          {Array.isArray(genetics.enzymes) ? genetics.enzymes.map(e => (
             <div key={e.gene} className="flex flex-col sm:flex-row sm:items-center justify-between py-3 border-b border-border last:border-0 gap-2">
               <div className="flex items-center gap-3">
                 <p className="text-sm font-mono font-medium w-24 shrink-0">{e.gene}</p>
@@ -43,11 +43,11 @@ export default function GeneticsPanel({ genetics }: GeneticsPanelProps) {
                 <p className="text-xs text-muted max-w-48 hidden md:block">{e.impact || e.implications}</p>
               </div>
             </div>
-          ))}
+          )) : []}
         </div>
       </DashboardCard>
 
-      {genetics.hlaTypes?.length > 0 && (
+      {Array.isArray(genetics.hlaTypes) && genetics.hlaTypes.length > 0 && (
         <DashboardCard title="HLA Types">
           <div className="space-y-0">
             {genetics.hlaTypes.map((h, i) => (

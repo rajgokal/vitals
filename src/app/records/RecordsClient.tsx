@@ -37,8 +37,8 @@ export default function RecordsClient({ records }: { records: MedicalRecord[] })
   const [sortOption, setSortOption] = useState('newest');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const types = Array.from(new Set(data.map(r => r.documentType))).sort();
-  const statuses = Array.from(new Set(data.map(r => r.status))).sort();
+  const types = Array.from(new Set((Array.isArray(data) ? data : []).map(r => r.documentType))).sort();
+  const statuses = Array.from(new Set((Array.isArray(data) ? data : []).map(r => r.status))).sort();
 
   const getSafeDate = (dateStr: string | undefined): number => {
     if (!dateStr) return 0;
@@ -46,7 +46,7 @@ export default function RecordsClient({ records }: { records: MedicalRecord[] })
     return isNaN(d.getTime()) ? 0 : d.getTime();
   };
 
-  const filtered = data
+  const filtered = (Array.isArray(data) ? data : [])
     .filter(r =>
       (typeFilter === 'all' || r.documentType === typeFilter) &&
       (statusFilter === 'all' || r.status === statusFilter)

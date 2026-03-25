@@ -14,7 +14,7 @@ export default function DashboardStats({ labCount, activeMeds, lastDrawDate }: D
 
   const displayLabCount = isPrivate ? fakeLabs.length : labCount;
   const displayActiveMeds = isPrivate
-    ? fakeMedications.filter(m => m.status === 'current' || m.active).length
+    ? (Array.isArray(fakeMedications) ? fakeMedications.filter(m => m.status === 'current' || m.active).length : 0)
     : activeMeds;
   const displayLastDraw = isPrivate ? fakeLabs[0]?.date : lastDrawDate;
 

@@ -18,7 +18,7 @@ export default function InteractionsTable({ interactions }: InteractionsTablePro
   return (
     <DashboardCard title="Interactions Watchlist">
       <div className="space-y-3">
-        {interactions.map((ix, i) => (
+        {Array.isArray(interactions) ? interactions.map((ix, i) => (
           <div key={i} className="p-3 rounded-lg border border-border hover:bg-card-hover">
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-sm font-medium">{ix.drugA || ix.drug1} ↔ {ix.drugB || ix.drug2}</p>
@@ -33,7 +33,7 @@ export default function InteractionsTable({ interactions }: InteractionsTablePro
               <p className="text-xs text-accent mt-1">{ix.recommendation}</p>
             )}
           </div>
-        ))}
+        )) : []}
       </div>
     </DashboardCard>
   );

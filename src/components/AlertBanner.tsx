@@ -15,7 +15,7 @@ export default function AlertBanner() {
 
   useEffect(() => {
     if (isPrivate) {
-      setAlerts(fakeAlerts.filter(a => a.status === 'active'));
+      setAlerts(Array.isArray(fakeAlerts) ? fakeAlerts.filter(a => a.status === 'active') : []);
       setLoading(false);
       return;
     }
@@ -66,9 +66,9 @@ export default function AlertBanner() {
 
   if (loading) return null;
 
-  const criticalAlerts = alerts.filter(alert => alert.severity === 'critical');
-  const warningAlerts = alerts.filter(alert => alert.severity === 'warning');
-  const infoAlerts = alerts.filter(alert => alert.severity === 'info');
+  const criticalAlerts = Array.isArray(alerts) ? alerts.filter(alert => alert.severity === 'critical') : [];
+  const warningAlerts = Array.isArray(alerts) ? alerts.filter(alert => alert.severity === 'warning') : [];
+  const infoAlerts = Array.isArray(alerts) ? alerts.filter(alert => alert.severity === 'info') : [];
 
   if (alerts.length === 0) return null;
 

@@ -13,7 +13,7 @@ interface ProvidersClientProps {
 
 export default function ProvidersClient({ providers }: ProvidersClientProps) {
   const { isPrivate } = usePrivacy();
-  const data = isPrivate ? fakeProviders : providers;
+  const data = isPrivate ? fakeProviders : (Array.isArray(providers) ? providers : []);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-6">
@@ -32,9 +32,9 @@ export default function ProvidersClient({ providers }: ProvidersClientProps) {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {data.map(p => (
+          {Array.isArray(data) ? data.map(p => (
             <ProviderCard key={p.name} provider={p} />
-          ))}
+          )) : []}
         </div>
       )}
     </div>

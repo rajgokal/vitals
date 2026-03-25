@@ -123,7 +123,7 @@ export async function GET_SUMMARY() {
           stats: {
             medications: Array.isArray(medications) ? medications.length : 0,
             labs: Array.isArray(labs) ? labs.length : 0,
-            alerts: Array.isArray(alerts) ? alerts.filter((a: any) => a.status === 'active').length : 0,
+            alerts: (Array.isArray(alerts) && alerts.length > 0) ? alerts.filter((a: any) => a.status === 'active').length : 0,
           },
         };
       })

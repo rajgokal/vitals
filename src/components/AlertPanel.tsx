@@ -40,9 +40,9 @@ export default function AlertPanel() {
     if (isPrivate) {
       let filtered = showDismissed
         ? [] // fake persona has no dismissed alerts
-        : fakeAlerts.filter(a => a.status === 'active');
-      if (selectedSeverity) filtered = filtered.filter(a => a.severity === selectedSeverity);
-      if (selectedCategory) filtered = filtered.filter(a => a.category === selectedCategory);
+        : (Array.isArray(fakeAlerts) ? fakeAlerts.filter(a => a.status === 'active') : []);
+      if (selectedSeverity) filtered = Array.isArray(filtered) ? filtered.filter(a => a.severity === selectedSeverity) : [];
+      if (selectedCategory) filtered = Array.isArray(filtered) ? filtered.filter(a => a.category === selectedCategory) : [];
       setAlerts(filtered);
       setLoading(false);
       return;
@@ -125,7 +125,7 @@ export default function AlertPanel() {
     }
   };
 
-  const groupedAlerts = alerts.reduce((groups, alert) => {
+  const groupedAlerts = (Array.isArray(alerts) ? alerts : []).reduce((groups, alert) => {
     const category = alert.category;
     if (!groups[category]) {
       groups[category] = [];

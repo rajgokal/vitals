@@ -24,8 +24,8 @@ function MedicationsContent() {
       .catch(() => setError(true));
   }, [profileId, isPrivate]);
 
-  const active = medications?.filter(m => m.status === 'current' || m.active) ?? [];
-  const historical = medications?.filter(m => m.status === 'stopped' || (m.active === false && m.status !== 'current')) ?? [];
+  const active = Array.isArray(medications) ? medications.filter(m => m.status === 'current' || m.active) : [];
+  const historical = Array.isArray(medications) ? medications.filter(m => m.status === 'stopped' || (m.active === false && m.status !== 'current')) : [];
 
   if (!medications && !error) {
     return (

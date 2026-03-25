@@ -15,9 +15,9 @@ interface MedicationsClientProps {
 export default function MedicationsClient({ active, historical }: MedicationsClientProps) {
   const { isPrivate } = usePrivacy();
 
-  const allMeds = isPrivate ? fakeMedications : [...active, ...historical];
-  const displayActive = allMeds.filter(m => m.status === 'current' || m.active);
-  const displayHistorical = allMeds.filter(m => m.status === 'stopped' || (m.active === false && m.status !== 'current'));
+  const allMeds = isPrivate ? fakeMedications : [...(Array.isArray(active) ? active : []), ...(Array.isArray(historical) ? historical : [])];
+  const displayActive = Array.isArray(allMeds) ? allMeds.filter(m => m.status === 'current' || m.active) : [];
+  const displayHistorical = Array.isArray(allMeds) ? allMeds.filter(m => m.status === 'stopped' || (m.active === false && m.status !== 'current')) : [];
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-8">

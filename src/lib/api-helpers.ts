@@ -47,7 +47,18 @@ export function createProfileGetHandler(dataType: string) {
       return NextResponse.json({ error: 'Invalid profile ID' }, { status: 400 });
     }
     
-    const data = await kvGetProfileData(dataType, profileId);
+    let data = await kvGetProfileData(dataType, profileId);
+    
+    // Handle legacy JSON string data (from migration)
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch {
+        // If parsing fails, treat as null
+        data = null;
+      }
+    }
+    
     return NextResponse.json(data ?? null);
   };
 }

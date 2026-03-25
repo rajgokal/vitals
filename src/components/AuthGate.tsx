@@ -39,7 +39,7 @@ export default function AuthGate() {
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-6 animate-in">
         <div className="text-center">
           <h1 className="text-2xl font-semibold text-accent tracking-tight">Vitals</h1>
-          <p className="text-sm text-muted mt-1">Health dashboard</p>
+          <p className="text-sm text-muted mt-1">Health dashboard - v2026.03.25.debug</p>
         </div>
         <div>
           <input

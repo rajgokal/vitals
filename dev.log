@@ -1,0 +1,23 @@
+
+> vitals@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.191:3000
+- Environments: .env.local
+
+✓ Starting...
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+✓ Ready in 319ms
+ GET /api/labs 200 in 646ms (compile: 80ms, proxy.ts: 27ms, render: 539ms)
+ GET /api/labs 200 in 386ms (compile: 3ms, proxy.ts: 2ms, render: 381ms)
+ GET /api/debug/kv-keys 404 in 1096ms (compile: 1045ms, proxy.ts: 2ms, render: 49ms)
+ GET /api/labs 200 in 574ms (compile: 1431µs, proxy.ts: 1811µs, render: 571ms)
+ GET /api/records 200 in 157ms (compile: 18ms, proxy.ts: 1528µs, render: 137ms)
+ GET /api/labs 200 in 547ms (compile: 1123µs, proxy.ts: 2ms, render: 544ms)
+ GET /api/labs 200 in 220ms (compile: 1012µs, proxy.ts: 1610µs, render: 218ms)
+ GET /api/labs 200 in 156ms (compile: 873µs, proxy.ts: 1097µs, render: 154ms)
+ GET /api/labs 200 in 527ms (compile: 1148µs, proxy.ts: 1585µs, render: 525ms)
+ GET /api/labs 200 in 598ms (compile: 1424µs, proxy.ts: 1845µs, render: 594ms)
+ GET /api/labs 200 in 138ms (compile: 1248µs, proxy.ts: 1439µs, render: 135ms)

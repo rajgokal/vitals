@@ -22,9 +22,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid profile ID' }, { status: 400 });
   }
 
-  const raw = await kvGetProfileData<unknown[]>('labs', profileId) ?? [];
-  // Filter corrupted entries
-  const draws = raw.filter(
+  const raw = await kvGetProfileData<unknown>('labs', profileId) ?? [];
+  // Ensure array shape and filter corrupted entries
+  const array: unknown[] = Array.isArray(raw)
+    ? raw
+    : raw != null && typeof raw === 'object'
+      ? [raw]
+      : [];
+  const draws = array.filter(
     (d): d is LabDraw =>
       d != null && typeof d === 'object' && !Array.isArray(d) &&
       typeof (d as Record<string, unknown>).date === 'string' &&

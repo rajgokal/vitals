@@ -42,8 +42,9 @@ export default function ProfileSelector({ profiles, currentProfileId }: ProfileS
   const handleProfileChange = (profileId: string) => {
     if (!mounted) return;
     
-    // Get current search params from window.location instead of useSearchParams hook
+    // Get current search params and pathname from window.location
     const currentParams = new URLSearchParams(window.location.search);
+    const currentPath = window.location.pathname;
     
     if (profileId === 'raj') {
       // Remove profileId param for default profile
@@ -52,7 +53,8 @@ export default function ProfileSelector({ profiles, currentProfileId }: ProfileS
       currentParams.set('profileId', profileId);
     }
     
-    const newUrl = currentParams.toString() ? `/?${currentParams.toString()}` : '/';
+    // Preserve the current path instead of forcing redirect to homepage
+    const newUrl = currentParams.toString() ? `${currentPath}?${currentParams.toString()}` : currentPath;
     router.push(newUrl);
     setIsOpen(false);
   };

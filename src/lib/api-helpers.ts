@@ -6,6 +6,11 @@ export function isAgentRequest(request: NextRequest): boolean {
 }
 
 export function getProfileIdFromRequest(request: NextRequest): string {
+  // Check header first (primary method)
+  const headerProfileId = request.headers.get('X-Profile-Id');
+  if (headerProfileId) return headerProfileId;
+  
+  // Fallback to query param for backward compatibility
   const { searchParams } = request.nextUrl;
   return searchParams.get('profileId') || 'raj';
 }

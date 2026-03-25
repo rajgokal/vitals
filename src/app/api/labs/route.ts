@@ -23,11 +23,23 @@ export async function GET(request: NextRequest) {
   }
 
   const [rawDraws, providers] = await Promise.all([
-    kvGetProfileData<unknown[]>('labs', profileId).then(d => d ?? []),
+    kvGetProfileData<unknown>('labs', profileId).then(d => d ?? []),
     kvGetProfileData<Provider[]>('providers', profileId).then(p => p ?? []),
   ]);
+  
+  // Ensure rawDraws is an array - handle corrupted data
+  let drawsArray: unknown[];
+  if (Array.isArray(rawDraws)) {
+    drawsArray = rawDraws;
+  } else if (rawDraws != null && typeof rawDraws === 'object') {
+    // Single object stored instead of array - wrap it
+    drawsArray = [rawDraws];
+  } else {
+    drawsArray = [];
+  }
+  
   // Filter out corrupted entries (must have string date + markers array)
-  const draws = rawDraws.filter(
+  const draws = drawsArray.filter(
     (d): d is LabDraw =>
       d != null && typeof d === 'object' && !Array.isArray(d) &&
       typeof (d as Record<string, unknown>).date === 'string' &&
@@ -79,7 +91,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'date and markers required' }, { status: 400 });
     }
     
-    const existing = await kvGetProfileData<LabDraw[]>('labs', profileId) ?? [];
+    const rawExisting = await kvGetProfileData<unknown>('labs', profileId);
+    const existing: LabDraw[] = Array.isArray(rawExisting)
+      ? rawExisting as LabDraw[]
+      : rawExisting && typeof rawExisting === 'object'
+        ? [rawExisting as LabDraw]
+        : [];
+    
     // Replace if same date exists, otherwise add
     const idx = existing.findIndex(d => d.date === draw.date);
     if (idx >= 0) {
@@ -90,7 +108,8 @@ export async function POST(request: NextRequest) {
     
     await kvSetProfileData('labs', profileId, existing);
     return NextResponse.json({ ok: true, profileId });
-  } catch {
+  } catch (e) {
+    console.error('Labs POST error', e);
     return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   }
 }

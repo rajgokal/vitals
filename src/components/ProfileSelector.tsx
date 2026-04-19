@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, User, Users, Baby } from 'lucide-react';
+import { ChevronDown, User, Users, Baby, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Profile } from '@/lib/types';
 
@@ -20,6 +20,8 @@ function getProfileIcon(relationship?: string) {
     case 'daughter':
     case 'son':
       return Baby;
+    case 'pet':
+      return Heart;
     case 'demo':
       return User;
     default:
@@ -154,6 +156,7 @@ export default function ProfileSelector({ profiles, currentProfileId }: ProfileS
                   <div className="text-xs text-muted">
                     {profile.relationship === 'self' ? 'Me' : 
                      profile.relationship === 'demo' ? 'Demo Profile' :
+                     profile.relationship === 'pet' ? 'Pet' :
                      profile.relationship}
                   </div>
                 </div>

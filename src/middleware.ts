@@ -59,9 +59,16 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // If no password is configured, allow public access
+  // If no password is configured: allow only in non-production (local/dev).
+  // In production, refuse open access rather than exposing the dashboard.
   if (!NEROVIEW_PASSWORD) {
-    return NextResponse.next();
+    if (process.env.NODE_ENV !== 'production') {
+      return NextResponse.next();
+    }
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Auth not configured' }, { status: 503 });
+    }
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   // Session cookie
